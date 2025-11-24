@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Coins, Banknote, Filter, Grid, List, Play, Plus, Search, X } from 'lucide-react';
+import { ArrowLeft, Coins, Banknote, Filter, Grid, List, Play, Plus, Search, X, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 import { estadosConservacion, PAISES } from '../../utils/constants';
@@ -7,6 +7,9 @@ import CardItem from './CardItem';
 import CardItemLista from './CardItemLista';
 import Slideshow from './Slideshow';
 import CountrySelect from '../common/CountrySelect';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, iniciarSlideshow }) => {
     const { modoOscuro } = useTheme();
@@ -25,6 +28,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
     const [vistaDisplay, setVistaDisplay] = useState('cuadricula');
     const [slideshowActivo, setSlideshowActivo] = useState(false);
+    const [mostrarMenuExportar, setMostrarMenuExportar] = useState(false);
 
     const aplicarFiltros = (items) => {
         return items.filter(item => {
@@ -63,6 +67,54 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
 
     const materialesUnicos = [...new Set(items.map(i => i.material))].filter(Boolean);
     const filtrosActivos = Object.values(filtros).some(f => f !== '');
+
+    const exportarExcel = () => {
+        const data = itemsFiltrados.map(item => ({
+            Nombre: item.nombre,
+            País: item.pais,
+            Año: item.ano,
+            ...(esMoneda ? { Material: item.material } : { Denominación: item.denominacion }),
+            Estado: item.estado,
+            'Valor Compra': item.valorComprado ? `L. ${item.valorComprado}` : '-',
+            'Valor Venta': item.valorVenta ? `L. ${item.valorVenta}` : '-',
+            Descripción: item.descripcion || '-'
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, esMoneda ? "Monedas" : "Billetes");
+        XLSX.writeFile(wb, `Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        setMostrarMenuExportar(false);
+    };
+
+    const exportarPDF = () => {
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text(`Reporte de Colección - ${esMoneda ? 'Monedas' : 'Billetes'}`, 14, 22);
+        doc.setFontSize(11);
+        doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 30);
+        doc.text(`Total items: ${itemsFiltrados.length}`, 14, 36);
+
+        const tableColumn = ["Nombre", "País", "Año", esMoneda ? "Material" : "Denominación", "Estado", "Valor (L.)"];
+        const tableRows = itemsFiltrados.map(item => [
+            item.nombre,
+            item.pais,
+            item.ano,
+            esMoneda ? item.material : item.denominacion,
+            item.estado,
+            item.valorComprado || '-'
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 45,
+        });
+
+        doc.save(`Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.pdf`);
+        setMostrarMenuExportar(false);
+    };
 
     if (slideshowActivo) {
         return (
@@ -103,6 +155,37 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                         </h1>
 
                         <div className="flex gap-2">
+                            <div className="relative">
+                                <button
+                                    onClick={() => setMostrarMenuExportar(!mostrarMenuExportar)}
+                                    className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
+                                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    title="Exportar"
+                                >
+                                    <Download size={20} />
+                                </button>
+                                {mostrarMenuExportar && (
+                                    <div className={`absolute top-full right-0 mt-2 w-48 rounded-xl shadow-lg z-20 overflow-hidden ${modoOscuro ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'}`}>
+                                        <button
+                                            onClick={exportarExcel}
+                                            className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-opacity-50 ${modoOscuro ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                        >
+                                            <FileSpreadsheet size={18} className="text-green-600" />
+                                            Excel
+                                        </button>
+                                        <button
+                                            onClick={exportarPDF}
+                                            className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-opacity-50 ${modoOscuro ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                        >
+                                            <FileText size={18} className="text-red-600" />
+                                            PDF
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
                             <button
                                 onClick={() => setMostrarFiltros(!mostrarFiltros)}
                                 className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${filtrosActivos
@@ -113,7 +196,8 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                     }`}
                             >
                                 <Filter size={20} />
-                                Filtros {filtrosActivos && `(${Object.values(filtros).filter(f => f !== '').length})`}
+                                <span className="hidden sm:inline">Filtros</span>
+                                {filtrosActivos && <span className="bg-white text-purple-600 text-xs px-1.5 py-0.5 rounded-full">{Object.values(filtros).filter(f => f !== '').length}</span>}
                             </button>
 
                             <button
@@ -144,10 +228,10 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                     setTipoFormulario(tipo);
                                     setVista('formulario');
                                 }}
-                                className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                                className="bg-indigo-600 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
                             >
                                 <Plus size={20} />
-                                Agregar
+                                <span className="hidden sm:inline">Agregar</span>
                             </button>
                         </div>
                     </div>

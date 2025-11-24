@@ -14,6 +14,7 @@ export const useCollection = () => {
 export const CollectionProvider = ({ children }) => {
     const [monedas, setMonedas] = useState([]);
     const [billetes, setBilletes] = useState([]);
+    const [wishlist, setWishlist] = useState([]);
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
@@ -24,12 +25,16 @@ export const CollectionProvider = ({ children }) => {
         try {
             const savedMonedas = await localforage.getItem('coleccion-monedas');
             const savedBilletes = await localforage.getItem('coleccion-billetes');
+            const savedWishlist = await localforage.getItem('coleccion-wishlist');
 
             if (savedMonedas) {
                 setMonedas(savedMonedas);
             }
             if (savedBilletes) {
                 setBilletes(savedBilletes);
+            }
+            if (savedWishlist) {
+                setWishlist(savedWishlist);
             }
         } catch (error) {
             console.log('Primera vez usando la app o error al cargar:', error);
@@ -58,6 +63,42 @@ export const CollectionProvider = ({ children }) => {
         }
     };
 
+    const guardarWishlist = async (nuevaWishlist) => {
+        try {
+            await localforage.setItem('coleccion-wishlist', nuevaWishlist);
+            setWishlist(nuevaWishlist);
+        } catch (error) {
+            console.error('Error al guardar wishlist:', error);
+        }
+    };
+
+    const addToWishlist = async (item) => {
+        const newItem = { ...item, id: Date.now().toString() };
+        const newWishlist = [...wishlist, newItem];
+        await guardarWishlist(newWishlist);
+    };
+
+    const removeFromWishlist = async (id) => {
+        const newWishlist = wishlist.filter(item => item.id !== id);
+        await guardarWishlist(newWishlist);
+    };
+
+    const downloadWishlist = () => {
+        const textContent = wishlist.map(item =>
+            `Nombre: ${item.nombre}\nPaís: ${item.pais}\nDenominación: ${item.denominacion}\n-------------------`
+        ).join('\n\n');
+
+        const blob = new Blob([textContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mi-wishlist-monedas.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     const toggleFavorito = async (id, tipo) => {
         if (tipo === 'monedas') {
             const nuevasMonedas = monedas.map(m =>
@@ -81,9 +122,13 @@ export const CollectionProvider = ({ children }) => {
     const value = {
         monedas,
         billetes,
+        wishlist,
         cargando,
         guardarMonedas,
         guardarBilletes,
+        addToWishlist,
+        removeFromWishlist,
+        downloadWishlist,
         toggleFavorito,
         calcularValorTotal
     };

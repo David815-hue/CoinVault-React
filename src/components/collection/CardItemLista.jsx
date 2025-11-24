@@ -83,12 +83,12 @@ const CardItemLista = ({ item, tipo, setVista, setItemEditando, setImagenZoom })
                     <div className="flex items-center gap-2">
                         {item.valorComprado && (
                             <span className="text-sm font-semibold text-green-600">
-                                Compra: ${parseFloat(item.valorComprado).toFixed(2)}
+                                Compra: L. {parseFloat(item.valorComprado).toFixed(2)}
                             </span>
                         )}
                         {item.valorVenta && (
                             <span className="text-sm font-semibold text-blue-600">
-                                Venta: ${parseFloat(item.valorVenta).toFixed(2)}
+                                Venta: L. {parseFloat(item.valorVenta).toFixed(2)}
                             </span>
                         )}
                     </div>

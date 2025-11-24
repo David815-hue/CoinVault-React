@@ -26,107 +26,129 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
     const valores = calcularValorTotal();
 
     return (
-        <div className={`min-h-screen ${modoOscuro ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'} p-4 md:p-6 pb-40`}>
+        <div className={`min-h-screen ${modoOscuro ? 'bg-slate-900' : 'bg-slate-50'} p-4 md:p-8 pb-40 transition-colors duration-300`}>
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-8">
-                    <h1 className={`text-4xl md:text-5xl font-bold ${modoOscuro ? 'text-white' : 'text-gray-800'} mb-2`}>
-                        📖 Dashboard de Colección
+                <div className="text-center mb-12 animate-fade-in">
+                    <h1 className={`text-4xl md:text-6xl font-bold ${modoOscuro ? 'text-white' : 'text-slate-900'} mb-4 tracking-tight`}>
+                        CoinVault
                     </h1>
-                    <p className={modoOscuro ? 'text-gray-400' : 'text-gray-600'}>Gestiona y visualiza tu colección numismática</p>
+                    <p className={`text-lg ${modoOscuro ? 'text-slate-400' : 'text-slate-500'} font-light`}>
+                        Gestiona tu colección numismática con elegancia
+                    </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    {/* Monedas Card */}
                     <div
                         onClick={() => setVista('monedas')}
-                        className="bg-gradient-to-br from-amber-500 to-yellow-600 rounded-2xl shadow-2xl p-8 text-white cursor-pointer transform hover:scale-105 transition-all hover:shadow-amber-500/50"
+                        className={`relative overflow-hidden rounded-3xl p-8 cursor-pointer transition-all duration-300 group ${modoOscuro
+                                ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 hover:border-amber-500/40'
+                                : 'bg-white border border-slate-200 hover:border-amber-200 shadow-xl shadow-slate-200/50'
+                            } hover:transform hover:-translate-y-2`}
                     >
-                        <div className="flex items-center justify-between mb-4">
-                            <Coins size={52} className="drop-shadow-lg" />
-                            <div className="text-right">
-                                <div className="text-3xl font-bold">{monedas.length}</div>
-                                <div className="text-amber-100 text-sm">Total</div>
-                            </div>
+                        <div className={`absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity ${modoOscuro ? 'text-amber-500' : 'text-amber-600'}`}>
+                            <Coins size={120} />
                         </div>
-                        <h2 className="text-2xl font-bold mb-2">Monedas</h2>
-                        <div className="space-y-1 text-amber-100">
-                            <p className="flex items-center gap-2">
-                                <Globe size={16} />
-                                {totalPaisesMonedas} países
-                            </p>
-                            <p className="flex items-center gap-2">
-                                <Heart size={16} />
-                                {monedas.filter(m => m.favorito).length} favoritas
-                            </p>
-                            {valores.totalMonedas > 0 && (
-                                <p className="flex items-center gap-2 font-semibold text-lg mt-2">
-                                    <DollarSign size={16} />
-                                    ${valores.totalMonedas.toFixed(2)}
-                                </p>
-                            )}
+
+                        <div className="relative z-10">
+                            <div className={`inline-flex p-3 rounded-2xl mb-6 ${modoOscuro ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-50 text-amber-600'}`}>
+                                <Coins size={32} />
+                            </div>
+                            <h2 className={`text-3xl font-bold mb-2 ${modoOscuro ? 'text-white' : 'text-slate-800'}`}>Monedas</h2>
+                            <div className={`text-5xl font-bold mb-6 ${modoOscuro ? 'text-amber-400' : 'text-amber-500'}`}>
+                                {monedas.length}
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className={`flex items-center gap-2 text-sm ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <Globe size={16} />
+                                    <span>{totalPaisesMonedas} países</span>
+                                </div>
+                                <div className={`flex items-center gap-2 text-sm ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <Heart size={16} />
+                                    <span>{monedas.filter(m => m.favorito).length} favoritas</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    {/* Billetes Card */}
                     <div
                         onClick={() => setVista('billetes')}
-                        className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl shadow-2xl p-8 text-white cursor-pointer transform hover:scale-105 transition-all hover:shadow-green-500/50"
+                        className={`relative overflow-hidden rounded-3xl p-8 cursor-pointer transition-all duration-300 group ${modoOscuro
+                                ? 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20 hover:border-emerald-500/40'
+                                : 'bg-white border border-slate-200 hover:border-emerald-200 shadow-xl shadow-slate-200/50'
+                            } hover:transform hover:-translate-y-2`}
                     >
-                        <div className="flex items-center justify-between mb-4">
-                            <Banknote size={52} className="drop-shadow-lg" />
-                            <div className="text-right">
-                                <div className="text-3xl font-bold">{billetes.length}</div>
-                                <div className="text-green-100 text-sm">Total</div>
-                            </div>
+                        <div className={`absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity ${modoOscuro ? 'text-emerald-500' : 'text-emerald-600'}`}>
+                            <Banknote size={120} />
                         </div>
-                        <h2 className="text-2xl font-bold mb-2">Billetes</h2>
-                        <div className="space-y-1 text-green-100">
-                            <p className="flex items-center gap-2">
-                                <Globe size={16} />
-                                {totalPaisesBilletes} países
-                            </p>
-                            <p className="flex items-center gap-2">
-                                <Heart size={16} />
-                                {billetes.filter(b => b.favorito).length} favoritos
-                            </p>
-                            {valores.totalBilletes > 0 && (
-                                <p className="flex items-center gap-2 font-semibold text-lg mt-2">
-                                    <DollarSign size={16} />
-                                    ${valores.totalBilletes.toFixed(2)}
-                                </p>
-                            )}
+
+                        <div className="relative z-10">
+                            <div className={`inline-flex p-3 rounded-2xl mb-6 ${modoOscuro ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
+                                <Banknote size={32} />
+                            </div>
+                            <h2 className={`text-3xl font-bold mb-2 ${modoOscuro ? 'text-white' : 'text-slate-800'}`}>Billetes</h2>
+                            <div className={`text-5xl font-bold mb-6 ${modoOscuro ? 'text-emerald-400' : 'text-emerald-500'}`}>
+                                {billetes.length}
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className={`flex items-center gap-2 text-sm ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <Globe size={16} />
+                                    <span>{totalPaisesBilletes} países</span>
+                                </div>
+                                <div className={`flex items-center gap-2 text-sm ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <Heart size={16} />
+                                    <span>{billetes.filter(b => b.favorito).length} favoritos</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div
-                        className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl shadow-2xl p-8 text-white"
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <BarChart3 size={52} className="drop-shadow-lg" />
-                            <Star size={40} className="text-yellow-300 drop-shadow-lg" />
-                        </div>
-                        <h2 className="text-2xl font-bold mb-4">Resumen Total</h2>
-                        <div className="space-y-3">
-                            <div className="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
-                                <div className="text-sm text-indigo-100">Elementos</div>
-                                <div className="text-2xl font-bold">{monedas.length + billetes.length}</div>
+                    {/* Resumen Card */}
+                    <div className={`relative overflow-hidden rounded-3xl p-8 transition-all duration-300 ${modoOscuro
+                            ? 'bg-gradient-to-br from-indigo-500/20 to-purple-600/10 border border-indigo-500/20'
+                            : 'bg-white border border-slate-200 shadow-xl shadow-slate-200/50'
+                        }`}>
+                        <div className="flex items-center justify-between mb-8">
+                            <div className={`inline-flex p-3 rounded-2xl ${modoOscuro ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`}>
+                                <BarChart3 size={32} />
                             </div>
-                            {valores.total > 0 && (
-                                <div className="bg-white/20 rounded-lg p-3 backdrop-blur-sm">
-                                    <div className="text-sm text-indigo-100">Valor Total</div>
-                                    <div className="text-2xl font-bold">${valores.total.toFixed(2)}</div>
+                            <div className={`p-2 rounded-full ${modoOscuro ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                                <Star size={24} className="text-yellow-400 fill-yellow-400" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <div className={`text-sm font-medium mb-1 ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>Valor Total Estimado</div>
+                                <div className={`text-4xl font-bold ${modoOscuro ? 'text-white' : 'text-slate-800'}`}>
+                                    ${valores.total.toFixed(2)}
                                 </div>
-                            )}
+                            </div>
+
+                            <div className={`h-px w-full ${modoOscuro ? 'bg-slate-700' : 'bg-slate-100'}`}></div>
+
+                            <div className="flex justify-between items-center">
+                                <div className={`text-sm ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>Total Elementos</div>
+                                <div className={`text-xl font-bold ${modoOscuro ? 'text-white' : 'text-slate-800'}`}>
+                                    {monedas.length + billetes.length}
+                                </div>
+                            </div>
+
                             <button
                                 onClick={() => setMostrarFavoritos(true)}
-                                className="w-full bg-yellow-400 text-indigo-900 py-3 rounded-lg font-bold hover:bg-yellow-300 transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-indigo-500/25 flex items-center justify-center gap-2"
                             >
-                                <Star size={20} />
+                                <Star size={18} />
                                 Ver Favoritos
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-8">
                     <MapaMundial
                         datos={monedasPorPais}
                         tipo="monedas"
@@ -144,37 +166,40 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
 
                 {paisSeleccionado && (
                     <div
-                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
                         onClick={() => setPaisSeleccionado(null)}
                     >
                         <div
-                            className={`${modoOscuro ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto`}
+                            className={`${modoOscuro ? 'bg-slate-800' : 'bg-white'} rounded-3xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl`}
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className={`text-2xl font-bold ${modoOscuro ? 'text-white' : 'text-gray-800'}`}>
-                                    🌍 {paisSeleccionado}
+                                <h2 className={`text-2xl font-bold ${modoOscuro ? 'text-white' : 'text-slate-800'} flex items-center gap-3`}>
+                                    <Globe className="text-indigo-500" />
+                                    {paisSeleccionado}
                                 </h2>
                                 <button
                                     onClick={() => setPaisSeleccionado(null)}
-                                    className={`${modoOscuro ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
+                                    className={`p-2 rounded-full transition-colors ${modoOscuro ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}
                                 >
                                     <X size={24} />
                                 </button>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 {monedas.filter(m => m.pais === paisSeleccionado).length > 0 && (
                                     <div>
-                                        <h3 className="font-bold text-lg text-amber-600 mb-3 flex items-center gap-2">
+                                        <h3 className="font-bold text-lg text-amber-500 mb-4 flex items-center gap-2">
                                             <Coins size={20} />
                                             Monedas ({monedas.filter(m => m.pais === paisSeleccionado).length})
                                         </h3>
-                                        <div className="space-y-2">
+                                        <div className="grid gap-3">
                                             {monedas.filter(m => m.pais === paisSeleccionado).map(m => (
-                                                <div key={m.id} className={`p-3 rounded-lg border ${modoOscuro ? 'bg-amber-900 border-amber-700' : 'bg-amber-50 border-amber-200'}`}>
-                                                    <div className={`font-semibold ${modoOscuro ? 'text-amber-100' : ''}`}>{m.nombre}</div>
-                                                    <div className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Año: {m.ano} - Estado: {m.estado}</div>
+                                                <div key={m.id} className={`p-4 rounded-xl border transition-all ${modoOscuro ? 'bg-slate-700/50 border-slate-600 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 hover:bg-white hover:shadow-md'}`}>
+                                                    <div className={`font-bold text-lg ${modoOscuro ? 'text-slate-200' : 'text-slate-800'}`}>{m.nombre}</div>
+                                                    <div className={`text-sm mt-1 ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                        Año: <span className="font-medium">{m.ano}</span> • Estado: <span className="font-medium">{m.estado}</span>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -183,15 +208,17 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
 
                                 {billetes.filter(b => b.pais === paisSeleccionado).length > 0 && (
                                     <div>
-                                        <h3 className="font-bold text-lg text-green-600 mb-3 flex items-center gap-2">
+                                        <h3 className="font-bold text-lg text-emerald-500 mb-4 flex items-center gap-2">
                                             <Banknote size={20} />
                                             Billetes ({billetes.filter(b => b.pais === paisSeleccionado).length})
                                         </h3>
-                                        <div className="space-y-2">
+                                        <div className="grid gap-3">
                                             {billetes.filter(b => b.pais === paisSeleccionado).map(b => (
-                                                <div key={b.id} className={`p-3 rounded-lg border ${modoOscuro ? 'bg-green-900 border-green-700' : 'bg-green-50 border-green-200'}`}>
-                                                    <div className={`font-semibold ${modoOscuro ? 'text-green-100' : ''}`}>{b.nombre}</div>
-                                                    <div className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Año: {b.ano} - Estado: {b.estado}</div>
+                                                <div key={b.id} className={`p-4 rounded-xl border transition-all ${modoOscuro ? 'bg-slate-700/50 border-slate-600 hover:bg-slate-700' : 'bg-slate-50 border-slate-200 hover:bg-white hover:shadow-md'}`}>
+                                                    <div className={`font-bold text-lg ${modoOscuro ? 'text-slate-200' : 'text-slate-800'}`}>{b.nombre}</div>
+                                                    <div className={`text-sm mt-1 ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                        Año: <span className="font-medium">{b.ano}</span> • Estado: <span className="font-medium">{b.estado}</span>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -201,7 +228,7 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
 
                             <button
                                 onClick={() => setPaisSeleccionado(null)}
-                                className="mt-6 w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700"
+                                className="mt-8 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 py-3 rounded-xl font-semibold transition-colors"
                             >
                                 Cerrar
                             </button>
