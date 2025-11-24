@@ -1,11 +1,13 @@
-import React from 'react';
-import { Camera, Edit2, Heart, Trash2, ZoomIn } from 'lucide-react';
+import React, { useState } from 'react';
+import { Camera, Edit2, Heart, Trash2, ZoomIn, Sparkles } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
+import ModalAIInfo from './ModalAIInfo';
 
 const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
     const { modoOscuro } = useTheme();
     const { toggleFavorito, eliminarItem } = useCollection();
+    const [showAI, setShowAI] = useState(false);
     const esMoneda = tipo === 'monedas';
 
     const handleEditar = () => {
@@ -134,6 +136,17 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
 
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
+                        onClick={() => setShowAI(true)}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-medium text-sm transition-colors ${modoOscuro
+                            ? 'bg-[var(--color-primary-dark)] hover:bg-[var(--color-primary)] text-white'
+                            : 'bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 text-[var(--color-primary-dark)]'
+                            }`}
+                        title="Ver Info IA"
+                    >
+                        <Sparkles size={14} />
+                        IA
+                    </button>
+                    <button
                         onClick={handleEditar}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-medium text-sm transition-colors ${modoOscuro
                             ? 'bg-slate-700 hover:bg-slate-600 text-white'
@@ -155,6 +168,14 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                     </button>
                 </div>
             </div>
+
+            {showAI && (
+                <ModalAIInfo
+                    item={item}
+                    tipo={tipo}
+                    onClose={() => setShowAI(false)}
+                />
+            )}
         </div>
     );
 };

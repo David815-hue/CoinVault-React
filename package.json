@@ -16,6 +16,7 @@
     "jspdf-autotable": "^5.0.2",
     "localforage": "^1.10.0",
     "lucide-react": "^0.554.0",
+    "openai": "^6.9.1",
     "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-cropper": "^2.3.3",

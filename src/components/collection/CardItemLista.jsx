@@ -1,11 +1,13 @@
-import React from 'react';
-import { Camera, Edit2, Heart, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Camera, Edit2, Heart, Trash2, Sparkles } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
+import ModalAIInfo from './ModalAIInfo';
 
 const CardItemLista = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
     const { modoOscuro } = useTheme();
     const { toggleFavorito, eliminarItem } = useCollection();
+    const [showAI, setShowAI] = useState(false);
     const esMoneda = tipo === 'monedas';
 
     const handleEditar = () => {
@@ -97,6 +99,13 @@ const CardItemLista = ({ item, tipo, setVista, setItemEditando, setImagenZoom })
                 {/* Botones de acción */}
                 <div className="flex flex-col gap-2">
                     <button
+                        onClick={() => setShowAI(true)}
+                        className={`p-2 rounded-lg transition-colors ${modoOscuro ? 'bg-[var(--color-primary-dark)] text-white hover:bg-[var(--color-primary)]' : 'bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] hover:bg-[var(--color-primary-light)]/80'}`}
+                        title="Ver Info IA"
+                    >
+                        <Sparkles size={16} />
+                    </button>
+                    <button
                         onClick={handleEditar}
                         className={`p-2 rounded-lg transition-colors ${modoOscuro ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
                         title="Editar"
@@ -112,6 +121,14 @@ const CardItemLista = ({ item, tipo, setVista, setItemEditando, setImagenZoom })
                     </button>
                 </div>
             </div>
+
+            {showAI && (
+                <ModalAIInfo
+                    item={item}
+                    tipo={tipo}
+                    onClose={() => setShowAI(false)}
+                />
+            )}
         </div>
     );
 };
