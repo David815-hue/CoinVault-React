@@ -76,8 +76,8 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                 </div>
 
                 {!esMoneda && item.denominacion && (
-                    <div className="inline-block bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 px-3 py-1 rounded-full text-xs font-bold mb-4 border border-indigo-200 dark:border-indigo-800">
-                        ${item.denominacion}
+                    <div className="inline-block bg-[var(--color-primary-light)] text-[var(--color-primary)] px-3 py-1 rounded-full text-xs font-bold mb-4 border border-[var(--color-primary-light)]">
+                        L. {item.denominacion}
                     </div>
                 )}
 
@@ -106,8 +106,8 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                         <div className="flex items-center justify-between">
                             <span className={`text-xs font-medium ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>ESTADO</span>
                             <span className={`font-semibold ${item.estado === 'Excelente' ? 'text-emerald-500' :
-                                    item.estado === 'Muy Bueno' ? 'text-blue-500' :
-                                        modoOscuro ? 'text-slate-300' : 'text-slate-600'
+                                item.estado === 'Muy Bueno' ? 'text-blue-500' :
+                                    modoOscuro ? 'text-slate-300' : 'text-slate-600'
                                 }`}>
                                 {item.estado}
                             </span>
@@ -120,13 +120,13 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                         {item.valorComprado && (
                             <div className={`p-2 rounded-lg text-center border ${modoOscuro ? 'bg-emerald-900/20 border-emerald-800/50' : 'bg-emerald-50 border-emerald-100'}`}>
                                 <div className={`text-[10px] font-bold uppercase tracking-wider ${modoOscuro ? 'text-emerald-400' : 'text-emerald-600'}`}>Compra</div>
-                                <div className={`font-bold ${modoOscuro ? 'text-emerald-300' : 'text-emerald-700'}`}>${parseFloat(item.valorComprado).toFixed(2)}</div>
+                                <div className={`font-bold ${modoOscuro ? 'text-emerald-300' : 'text-emerald-700'}`}>L. {parseFloat(item.valorComprado).toFixed(2)}</div>
                             </div>
                         )}
                         {item.valorVenta && (
                             <div className={`p-2 rounded-lg text-center border ${modoOscuro ? 'bg-indigo-900/20 border-indigo-800/50' : 'bg-indigo-50 border-indigo-100'}`}>
                                 <div className={`text-[10px] font-bold uppercase tracking-wider ${modoOscuro ? 'text-indigo-400' : 'text-indigo-600'}`}>Venta</div>
-                                <div className={`font-bold ${modoOscuro ? 'text-indigo-300' : 'text-indigo-700'}`}>${parseFloat(item.valorVenta).toFixed(2)}</div>
+                                <div className={`font-bold ${modoOscuro ? 'text-indigo-300' : 'text-indigo-700'}`}>L. {parseFloat(item.valorVenta).toFixed(2)}</div>
                             </div>
                         )}
                     </div>
@@ -136,8 +136,8 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                     <button
                         onClick={handleEditar}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-medium text-sm transition-colors ${modoOscuro
-                                ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                            ? 'bg-slate-700 hover:bg-slate-600 text-white'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                             }`}
                     >
                         <Edit2 size={14} />
@@ -146,8 +146,8 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                     <button
                         onClick={handleEliminar}
                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-medium text-sm transition-colors ${modoOscuro
-                                ? 'bg-rose-900/30 hover:bg-rose-900/50 text-rose-400'
-                                : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
+                            ? 'bg-rose-900/30 hover:bg-rose-900/50 text-rose-400'
+                            : 'bg-rose-50 hover:bg-rose-100 text-rose-600'
                             }`}
                     >
                         <Trash2 size={14} />

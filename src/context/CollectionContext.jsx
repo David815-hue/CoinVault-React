@@ -119,6 +119,54 @@ export const CollectionProvider = ({ children }) => {
         return { totalMonedas, totalBilletes, total: totalMonedas + totalBilletes };
     };
 
+    const exportarBackup = async () => {
+        try {
+            const backupData = {
+                monedas,
+                billetes,
+                wishlist,
+                fecha: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `coinvault-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            return true;
+        } catch (error) {
+            console.error('Error al exportar backup:', error);
+            return false;
+        }
+    };
+
+    const importarBackup = async (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    if (data.monedas) await guardarMonedas(data.monedas);
+                    if (data.billetes) await guardarBilletes(data.billetes);
+                    if (data.wishlist) await guardarWishlist(data.wishlist);
+
+                    resolve({ success: true, message: 'Backup restaurado correctamente' });
+                } catch (error) {
+                    console.error('Error al importar backup:', error);
+                    resolve({ success: false, message: 'Error al procesar el archivo de backup' });
+                }
+            };
+            reader.onerror = () => resolve({ success: false, message: 'Error al leer el archivo' });
+            reader.readAsText(file);
+        });
+    };
+
     const value = {
         monedas,
         billetes,
@@ -130,7 +178,9 @@ export const CollectionProvider = ({ children }) => {
         removeFromWishlist,
         downloadWishlist,
         toggleFavorito,
-        calcularValorTotal
+        calcularValorTotal,
+        exportarBackup,
+        importarBackup
     };
 
     return (

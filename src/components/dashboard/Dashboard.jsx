@@ -42,8 +42,8 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
                     <div
                         onClick={() => setVista('monedas')}
                         className={`relative overflow-hidden rounded-3xl p-8 cursor-pointer transition-all duration-300 group ${modoOscuro
-                                ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 hover:border-amber-500/40'
-                                : 'bg-white border border-slate-200 hover:border-amber-200 shadow-xl shadow-slate-200/50'
+                            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 hover:border-amber-500/40'
+                            : 'bg-white border border-slate-200 hover:border-amber-200 shadow-xl shadow-slate-200/50'
                             } hover:transform hover:-translate-y-2`}
                     >
                         <div className={`absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity ${modoOscuro ? 'text-amber-500' : 'text-amber-600'}`}>
@@ -76,8 +76,8 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
                     <div
                         onClick={() => setVista('billetes')}
                         className={`relative overflow-hidden rounded-3xl p-8 cursor-pointer transition-all duration-300 group ${modoOscuro
-                                ? 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20 hover:border-emerald-500/40'
-                                : 'bg-white border border-slate-200 hover:border-emerald-200 shadow-xl shadow-slate-200/50'
+                            ? 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20 hover:border-emerald-500/40'
+                            : 'bg-white border border-slate-200 hover:border-emerald-200 shadow-xl shadow-slate-200/50'
                             } hover:transform hover:-translate-y-2`}
                     >
                         <div className={`absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity ${modoOscuro ? 'text-emerald-500' : 'text-emerald-600'}`}>
@@ -108,8 +108,8 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
 
                     {/* Resumen Card */}
                     <div className={`relative overflow-hidden rounded-3xl p-8 transition-all duration-300 ${modoOscuro
-                            ? 'bg-gradient-to-br from-indigo-500/20 to-purple-600/10 border border-indigo-500/20'
-                            : 'bg-white border border-slate-200 shadow-xl shadow-slate-200/50'
+                        ? 'bg-gradient-to-br from-indigo-500/20 to-purple-600/10 border border-indigo-500/20'
+                        : 'bg-white border border-slate-200 shadow-xl shadow-slate-200/50'
                         }`}>
                         <div className="flex items-center justify-between mb-8">
                             <div className={`inline-flex p-3 rounded-2xl ${modoOscuro ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`}>
@@ -124,7 +124,7 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
                             <div>
                                 <div className={`text-sm font-medium mb-1 ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>Valor Total Estimado</div>
                                 <div className={`text-4xl font-bold ${modoOscuro ? 'text-white' : 'text-slate-800'}`}>
-                                    ${valores.total.toFixed(2)}
+                                    L. {valores.total.toFixed(2)}
                                 </div>
                             </div>
 
@@ -139,7 +139,7 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
 
                             <button
                                 onClick={() => setMostrarFavoritos(true)}
-                                className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-indigo-500/25 flex items-center justify-center gap-2"
+                                className="w-full py-3 rounded-xl font-semibold bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-all shadow-lg hover:shadow-indigo-500/25 flex items-center justify-center gap-2"
                             >
                                 <Star size={18} />
                                 Ver Favoritos

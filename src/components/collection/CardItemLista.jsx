@@ -82,12 +82,12 @@ const CardItemLista = ({ item, tipo, setVista, setItemEditando, setImagenZoom })
 
                     <div className="flex items-center gap-2">
                         {item.valorComprado && (
-                            <span className="text-sm font-semibold text-green-600">
+                            <span className="text-sm font-semibold text-emerald-600">
                                 Compra: L. {parseFloat(item.valorComprado).toFixed(2)}
                             </span>
                         )}
                         {item.valorVenta && (
-                            <span className="text-sm font-semibold text-blue-600">
+                            <span className="text-sm font-semibold text-indigo-600">
                                 Venta: L. {parseFloat(item.valorVenta).toFixed(2)}
                             </span>
                         )}
@@ -98,14 +98,14 @@ const CardItemLista = ({ item, tipo, setVista, setItemEditando, setImagenZoom })
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={handleEditar}
-                        className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        className={`p-2 rounded-lg transition-colors ${modoOscuro ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
                         title="Editar"
                     >
                         <Edit2 size={16} />
                     </button>
                     <button
                         onClick={handleEliminar}
-                        className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        className={`p-2 rounded-lg transition-colors ${modoOscuro ? 'bg-rose-900/30 text-rose-400 hover:bg-rose-900/50' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}
                         title="Eliminar"
                     >
                         <Trash2 size={16} />

@@ -1,9 +1,28 @@
 import React from 'react';
-import { X, Check, Moon, Sun, Palette } from 'lucide-react';
+import { X, Check, Moon, Sun, Palette, Download, Upload } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
+import { useCollection } from '../../context/CollectionContext';
 
 const ModalTemas = ({ onClose }) => {
     const { modoOscuro, toggleModoOscuro, temaColor, cambiarTemaColor } = useTheme();
+    const { exportarBackup, importarBackup } = useCollection();
+
+    const handleExportar = async () => {
+        const success = await exportarBackup();
+        if (success) alert('Backup exportado correctamente');
+    };
+
+    const handleImportar = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (window.confirm('¿Estás seguro de restaurar este backup? Se reemplazarán los datos actuales.')) {
+            const result = await importarBackup(file);
+            alert(result.message);
+            if (result.success) onClose();
+        }
+        e.target.value = ''; // Reset input
+    };
 
     const themes = [
         { id: 'indigo', name: 'Indigo', color: '#6366f1' },
@@ -41,8 +60,8 @@ const ModalTemas = ({ onClose }) => {
                             <button
                                 onClick={() => !modoOscuro && toggleModoOscuro()}
                                 className={`flex items-center justify-center gap-2 p-3 rounded-lg transition-all ${!modoOscuro
-                                        ? 'bg-white shadow-sm text-[var(--color-primary)]'
-                                        : 'text-slate-500 hover:text-slate-400'
+                                    ? 'bg-white shadow-sm text-[var(--color-primary)]'
+                                    : 'text-slate-500 hover:text-slate-400'
                                     }`}
                             >
                                 <Sun size={18} />
@@ -51,8 +70,8 @@ const ModalTemas = ({ onClose }) => {
                             <button
                                 onClick={() => modoOscuro && toggleModoOscuro()}
                                 className={`flex items-center justify-center gap-2 p-3 rounded-lg transition-all ${modoOscuro
-                                        ? 'bg-slate-700 shadow-sm text-[var(--color-primary)]'
-                                        : 'text-slate-500 hover:text-slate-600'
+                                    ? 'bg-slate-700 shadow-sm text-[var(--color-primary)]'
+                                    : 'text-slate-500 hover:text-slate-600'
                                     }`}
                             >
                                 <Moon size={18} />
@@ -70,8 +89,8 @@ const ModalTemas = ({ onClose }) => {
                                     key={theme.id}
                                     onClick={() => cambiarTemaColor(theme.id)}
                                     className={`group relative flex flex-col items-center gap-2 p-2 rounded-xl transition-all ${temaColor === theme.id
-                                            ? modoOscuro ? 'bg-slate-700 ring-2 ring-offset-2 ring-offset-slate-800 ring-[var(--color-primary)]' : 'bg-slate-50 ring-2 ring-offset-2 ring-[var(--color-primary)]'
-                                            : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+                                        ? modoOscuro ? 'bg-slate-700 ring-2 ring-offset-2 ring-offset-slate-800 ring-[var(--color-primary)]' : 'bg-slate-50 ring-2 ring-offset-2 ring-[var(--color-primary)]'
+                                        : 'hover:bg-slate-100 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     <div
@@ -85,6 +104,34 @@ const ModalTemas = ({ onClose }) => {
                                     <span className="text-[10px] font-medium opacity-70">{theme.name}</span>
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* Backup & Restore */}
+                    <div>
+                        <h3 className="text-sm font-medium mb-3 opacity-70">Copia de Seguridad</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={handleExportar}
+                                className={`flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${modoOscuro
+                                    ? 'border-slate-700 hover:bg-slate-700 text-slate-300'
+                                    : 'border-slate-200 hover:bg-slate-50 text-slate-600'}`}
+                            >
+                                <Download size={18} />
+                                <span className="text-sm font-medium">Exportar</span>
+                            </button>
+                            <label className={`flex items-center justify-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${modoOscuro
+                                ? 'border-slate-700 hover:bg-slate-700 text-slate-300'
+                                : 'border-slate-200 hover:bg-slate-50 text-slate-600'}`}>
+                                <Upload size={18} />
+                                <span className="text-sm font-medium">Importar</span>
+                                <input
+                                    type="file"
+                                    accept=".json"
+                                    className="hidden"
+                                    onChange={handleImportar}
+                                />
+                            </label>
                         </div>
                     </div>
                 </div>
