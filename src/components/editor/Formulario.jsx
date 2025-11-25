@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Coins, Banknote, Camera, Edit2 } from 'lucide-react';
+import { ArrowLeft, Coins, Banknote, Camera, Edit2, Image } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { useTheme } from '../../hooks/useTheme';
@@ -218,11 +218,11 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                                 type="button"
                                                 onClick={() => handleGalleryPick((img) => setFormData({ ...formData, fotoFrontal: img }), esMoneda)}
                                                 className={`flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg transition-colors ${modoOscuro
-                                                    ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
-                                                    : 'border-gray-300 hover:border-indigo-500'
+                                                    ? 'border-gray-600 hover:border-green-500 bg-gray-700'
+                                                    : 'border-gray-300 hover:border-green-500'
                                                     }`}
                                             >
-                                                <Camera size={20} className="text-gray-400" />
+                                                <Image size={20} className="text-green-500" />
                                                 <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Galería</span>
                                             </button>
                                         </div>
@@ -287,11 +287,11 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                                 type="button"
                                                 onClick={() => handleGalleryPick((img) => setFormData({ ...formData, fotoTrasera: img }), esMoneda)}
                                                 className={`flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg transition-colors ${modoOscuro
-                                                    ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
-                                                    : 'border-gray-300 hover:border-indigo-500'
+                                                    ? 'border-gray-600 hover:border-green-500 bg-gray-700'
+                                                    : 'border-gray-300 hover:border-green-500'
                                                     }`}
                                             >
-                                                <Camera size={20} className="text-gray-400" />
+                                                <Image size={20} className="text-green-500" />
                                                 <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Galería</span>
                                             </button>
                                         </div>

@@ -46,11 +46,11 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                     {/* Front Side */}
                     <div className="absolute w-full h-full backface-hidden">
                         {item.fotoFrontal ? (
-                            <div className="relative w-full h-full">
+                            <div className={`relative w-full h-full ${modoOscuro ? 'bg-slate-900' : 'bg-slate-100'}`}>
                                 <img
                                     src={item.fotoFrontal}
                                     alt="Frontal"
-                                    className="w-full h-full object-cover"
+                                    className={`w-full h-full ${esMoneda ? 'object-contain p-3' : 'object-cover'}`}
                                 />
                                 <div className="absolute inset-0 bg-black/0 group-hover/flip:bg-black/10 transition-all flex items-center justify-center">
                                     <RotateCw className="text-white opacity-0 group-hover/flip:opacity-100 transition-all transform scale-50 group-hover/flip:scale-100 drop-shadow-lg" size={32} />
@@ -66,11 +66,11 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                     {/* Back Side */}
                     <div className="absolute w-full h-full backface-hidden rotate-y-180">
                         {item.fotoTrasera ? (
-                            <div className="relative w-full h-full">
+                            <div className={`relative w-full h-full ${modoOscuro ? 'bg-slate-900' : 'bg-slate-100'}`}>
                                 <img
                                     src={item.fotoTrasera}
                                     alt="Trasera"
-                                    className="w-full h-full object-cover"
+                                    className={`w-full h-full ${esMoneda ? 'object-contain p-3' : 'object-cover'}`}
                                 />
                                 <div className="absolute inset-0 bg-black/0 group-hover/flip:bg-black/10 transition-all flex items-center justify-center">
                                     <RotateCw className="text-white opacity-0 group-hover/flip:opacity-100 transition-all transform scale-50 group-hover/flip:scale-100 drop-shadow-lg" size={32} />
