@@ -69,13 +69,13 @@ const MapaMundial = ({ datos, tipo, titulo, setPaisSeleccionado }) => {
             </div>
 
             <div className="relative">
-                <div className={`rounded-xl overflow-hidden border ${modoOscuro ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-blue-50'}`} style={{ height: "500px" }}>
+                <div className={`rounded-xl overflow-hidden border ${modoOscuro ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-blue-50'}`} style={{ height: "300px" }}>
                     <ComposableMap
                         projectionConfig={{
                             rotate: [-10, 0, 0],
                             scale: 147
                         }}
-                        height={500}
+                        height={300}
                     >
                         <ZoomableGroup
                             zoom={position.zoom}
@@ -150,8 +150,8 @@ const MapaMundial = ({ datos, tipo, titulo, setPaisSeleccionado }) => {
                             key={pais}
                             onClick={() => setPaisSeleccionado(pais)}
                             className={`px-3 py-1 rounded-full text-sm cursor-pointer transition-colors border ${tipo === 'monedas'
-                                    ? (modoOscuro ? 'bg-amber-900/30 border-amber-700 text-amber-200 hover:bg-amber-900/50' : 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100')
-                                    : (modoOscuro ? 'bg-green-900/30 border-green-700 text-green-200 hover:bg-green-900/50' : 'bg-green-50 border-green-200 text-green-800 hover:bg-green-100')
+                                ? (modoOscuro ? 'bg-amber-900/30 border-amber-700 text-amber-200 hover:bg-amber-900/50' : 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100')
+                                : (modoOscuro ? 'bg-green-900/30 border-green-700 text-green-200 hover:bg-green-900/50' : 'bg-green-50 border-green-200 text-green-800 hover:bg-green-100')
                                 }`}
                         >
                             <span className="font-bold mr-1">{cantidad}</span>

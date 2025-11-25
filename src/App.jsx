@@ -11,6 +11,7 @@ import ModalFavoritos from './components/collection/ModalFavoritos';
 import ModalWishlist from './components/collection/ModalWishlist';
 import ModalTemas from './components/layout/ModalTemas';
 import Slideshow from './components/collection/Slideshow';
+import VistaAlbumes from './components/albums/VistaAlbumes';
 
 const MainContent = () => {
   const { modoOscuro, toggleModoOscuro } = useTheme();
@@ -79,6 +80,10 @@ const MainContent = () => {
           setImagenZoom={setImagenZoom}
           iniciarSlideshow={iniciarSlideshow}
         />
+      )}
+
+      {vista === 'albumes' && (
+        <VistaAlbumes />
       )}
 
       {vista === 'formulario' && (

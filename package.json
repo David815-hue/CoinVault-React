@@ -7,9 +7,19 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "android": "npm run build && npx cap sync android && npx cap open android",
+    "sync": "npx cap sync"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^7.0.2",
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/app": "^7.1.0",
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/filesystem": "^7.1.4",
+    "@sqlite.org/sqlite-wasm": "^3.51.1-build1",
     "cropperjs": "^1.6.2",
     "d3-scale": "^4.0.2",
     "jspdf": "^3.0.4",
@@ -21,6 +31,7 @@
     "react": "^19.2.0",
     "react-cropper": "^2.3.3",
     "react-dom": "^19.2.0",
+    "react-pageflip": "^2.0.3",
     "react-simple-maps": "^3.0.0",
     "topojson-client": "^3.1.0",
     "xlsx": "^0.18.5"
@@ -38,6 +49,7 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vite-plugin-cross-origin-isolation": "^0.1.6"
   }
 }

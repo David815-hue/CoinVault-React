@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Coins, Banknote, Camera, Edit2 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 import { PAISES, materialesMoneda, estadosConservacion } from '../../utils/constants';
@@ -8,7 +10,7 @@ import CountrySelect from '../common/CountrySelect';
 
 const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando }) => {
     const { modoOscuro } = useTheme();
-    const { monedas, billetes, guardarMonedas, guardarBilletes } = useCollection();
+    const { agregarItem, actualizarItem } = useCollection();
     const esMoneda = tipoFormulario === 'monedas';
 
     const [formData, setFormData] = useState(itemEditando || {
@@ -28,7 +30,46 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
     const [imagenEditando, setImagenEditando] = useState(null);
     const [tipoImagenEditando, setTipoImagenEditando] = useState(null);
 
-    const handleImageUpload = (e, setCallback, esMoneda) => {
+    // Nueva función para cámara en móvil
+    const handleCameraCapture = async (setCallback, esMoneda) => {
+        try {
+            const image = await CapCamera.getPhoto({
+                quality: 90,
+                allowEditing: false,
+                resultType: CameraResultType.DataUrl,
+                source: CameraSource.Camera
+            });
+
+            if (image.dataUrl) {
+                setImagenEditando(image.dataUrl);
+                setTipoImagenEditando({ callback: setCallback, esMoneda });
+            }
+        } catch (error) {
+            console.error('Error al capturar imagen:', error);
+        }
+    };
+
+    // Nueva función para galería en móvil
+    const handleGalleryPick = async (setCallback, esMoneda) => {
+        try {
+            const image = await CapCamera.getPhoto({
+                quality: 90,
+                allowEditing: false,
+                resultType: CameraResultType.DataUrl,
+                source: CameraSource.Photos
+            });
+
+            if (image.dataUrl) {
+                setImagenEditando(image.dataUrl);
+                setTipoImagenEditando({ callback: setCallback, esMoneda });
+            }
+        } catch (error) {
+            console.error('Error al seleccionar imagen:', error);
+        }
+    };
+
+    const handleImageUpload = async (e, setCallback, esMoneda) => {
+        // En web, usar file input tradicional
         const file = e.target.files[0];
         if (file) {
             if (file.size > 2000000) {
@@ -70,21 +111,13 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
             id: itemEditando?.id || Date.now().toString()
         };
 
-        if (esMoneda) {
-            if (itemEditando) {
-                guardarMonedas(monedas.map(m => m.id === itemEditando.id ? nuevoItem : m));
-            } else {
-                guardarMonedas([...monedas, nuevoItem]);
-            }
-            setVista('monedas');
+        if (itemEditando) {
+            actualizarItem(nuevoItem);
         } else {
-            if (itemEditando) {
-                guardarBilletes(billetes.map(b => b.id === itemEditando.id ? nuevoItem : b));
-            } else {
-                guardarBilletes([...billetes, nuevoItem]);
-            }
-            setVista('billetes');
+            agregarItem(nuevoItem, esMoneda ? 'monedas' : 'billetes');
         }
+
+        setVista(esMoneda ? 'monedas' : 'billetes');
         setItemEditando(null);
     };
 
@@ -158,24 +191,53 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                 <label className={`block text-sm font-semibold ${modoOscuro ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                                     Foto Frontal
                                 </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => handleImageUpload(e, (img) => setFormData({ ...formData, fotoFrontal: img }), esMoneda)}
-                                    className="hidden"
-                                    id="fotoFrontal"
-                                />
+                                {!Capacitor.isNativePlatform() && (
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleImageUpload(e, (img) => setFormData({ ...formData, fotoFrontal: img }), esMoneda)}
+                                        className="hidden"
+                                        id="fotoFrontal"
+                                    />
+                                )}
                                 {!formData.fotoFrontal ? (
-                                    <label
-                                        htmlFor="fotoFrontal"
-                                        className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${modoOscuro
-                                            ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
-                                            : 'border-gray-300 hover:border-indigo-500'
-                                            }`}
-                                    >
-                                        <Camera size={20} className="text-gray-400" />
-                                        <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Subir foto</span>
-                                    </label>
+                                    Capacitor.isNativePlatform() ? (
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleCameraCapture((img) => setFormData({ ...formData, fotoFrontal: img }), esMoneda)}
+                                                className={`flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg transition-colors ${modoOscuro
+                                                    ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
+                                                    : 'border-gray-300 hover:border-indigo-500'
+                                                    }`}
+                                            >
+                                                <Camera size={20} className="text-gray-400" />
+                                                <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Cámara</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleGalleryPick((img) => setFormData({ ...formData, fotoFrontal: img }), esMoneda)}
+                                                className={`flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg transition-colors ${modoOscuro
+                                                    ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
+                                                    : 'border-gray-300 hover:border-indigo-500'
+                                                    }`}
+                                            >
+                                                <Camera size={20} className="text-gray-400" />
+                                                <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Galería</span>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label
+                                            htmlFor="fotoFrontal"
+                                            className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${modoOscuro
+                                                ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
+                                                : 'border-gray-300 hover:border-indigo-500'
+                                                }`}
+                                        >
+                                            <Camera size={20} className="text-gray-400" />
+                                            <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Subir foto</span>
+                                        </label>
+                                    )
                                 ) : (
                                     <div className="relative group">
                                         <img src={formData.fotoFrontal} alt="Frontal" className="w-full h-48 object-cover rounded-lg" />
@@ -198,24 +260,53 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                 <label className={`block text-sm font-semibold ${modoOscuro ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                                     Foto Trasera
                                 </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => handleImageUpload(e, (img) => setFormData({ ...formData, fotoTrasera: img }), esMoneda)}
-                                    className="hidden"
-                                    id="fotoTrasera"
-                                />
+                                {!Capacitor.isNativePlatform() && (
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleImageUpload(e, (img) => setFormData({ ...formData, fotoTrasera: img }), esMoneda)}
+                                        className="hidden"
+                                        id="fotoTrasera"
+                                    />
+                                )}
                                 {!formData.fotoTrasera ? (
-                                    <label
-                                        htmlFor="fotoTrasera"
-                                        className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${modoOscuro
-                                            ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
-                                            : 'border-gray-300 hover:border-indigo-500'
-                                            }`}
-                                    >
-                                        <Camera size={20} className="text-gray-400" />
-                                        <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Subir foto</span>
-                                    </label>
+                                    Capacitor.isNativePlatform() ? (
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleCameraCapture((img) => setFormData({ ...formData, fotoTrasera: img }), esMoneda)}
+                                                className={`flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg transition-colors ${modoOscuro
+                                                    ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
+                                                    : 'border-gray-300 hover:border-indigo-500'
+                                                    }`}
+                                            >
+                                                <Camera size={20} className="text-gray-400" />
+                                                <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Cámara</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleGalleryPick((img) => setFormData({ ...formData, fotoTrasera: img }), esMoneda)}
+                                                className={`flex items-center justify-center gap-2 px-4 py-3 border-2 rounded-lg transition-colors ${modoOscuro
+                                                    ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
+                                                    : 'border-gray-300 hover:border-indigo-500'
+                                                    }`}
+                                            >
+                                                <Camera size={20} className="text-gray-400" />
+                                                <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Galería</span>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label
+                                            htmlFor="fotoTrasera"
+                                            className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${modoOscuro
+                                                ? 'border-gray-600 hover:border-indigo-500 bg-gray-700'
+                                                : 'border-gray-300 hover:border-indigo-500'
+                                                }`}
+                                        >
+                                            <Camera size={20} className="text-gray-400" />
+                                            <span className={`text-sm ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Subir foto</span>
+                                        </label>
+                                    )
                                 ) : (
                                     <div className="relative group">
                                         <img src={formData.fotoTrasera} alt="Trasera" className="w-full h-48 object-cover rounded-lg" />

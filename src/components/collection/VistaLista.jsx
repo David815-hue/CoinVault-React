@@ -87,7 +87,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
         setMostrarMenuExportar(false);
     };
 
-    const exportarPDF = () => {
+    const exportarPDF = async () => {
         const doc = new jsPDF();
 
         doc.setFontSize(18);
@@ -96,21 +96,52 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
         doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 30);
         doc.text(`Total items: ${itemsFiltrados.length}`, 14, 36);
 
-        const tableColumn = ["Nombre", "País", "Año", esMoneda ? "Material" : "Denominación", "Estado", "Valor (L.)"];
-        const tableRows = itemsFiltrados.map(item => [
-            item.nombre,
-            item.pais,
-            item.ano,
-            esMoneda ? item.material : item.denominacion,
-            item.estado,
-            item.valorComprado || '-'
-        ]);
+        let yPosition = 50;
+        const pageHeight = doc.internal.pageSize.height;
+        const itemHeight = 60; // Altura de cada item con imagen
 
-        autoTable(doc, {
-            head: [tableColumn],
-            body: tableRows,
-            startY: 45,
-        });
+        for (let i = 0; i < itemsFiltrados.length; i++) {
+            const item = itemsFiltrados[i];
+
+            // Verificar si necesitamos nueva página
+            if (yPosition + itemHeight > pageHeight - 20) {
+                doc.addPage();
+                yPosition = 20;
+            }
+
+            // Dibujar borde del item
+            doc.setDrawColor(200);
+            doc.setLineWidth(0.5);
+            doc.rect(14, yPosition, 182, itemHeight);
+
+            // Agregar imagen si existe
+            if (item.fotoFrontal) {
+                try {
+                    // Dimensiones de la imagen
+                    const imgWidth = 40;
+                    const imgHeight = esMoneda ? 40 : 25; // Redondo para monedas, rectangular para billetes
+                    doc.addImage(item.fotoFrontal, 'JPEG', 18, yPosition + 5, imgWidth, imgHeight);
+                } catch (error) {
+                    console.error('Error al agregar imagen al PDF:', error);
+                }
+            }
+
+            // Información del item
+            const textX = 65;
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text(item.nombre, textX, yPosition + 10);
+
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            doc.text(`País: ${item.pais}`, textX, yPosition + 18);
+            doc.text(`Año: ${item.ano}`, textX, yPosition + 26);
+            doc.text(esMoneda ? `Material: ${item.material || '-'}` : `Denominación: ${item.denominacion || '-'}`, textX, yPosition + 34);
+            doc.text(`Estado: ${item.estado}`, textX, yPosition + 42);
+            doc.text(`Valor Compra: L. ${item.valorComprado || '-'}`, textX, yPosition + 50);
+
+            yPosition += itemHeight + 10;
+        }
 
         doc.save(`Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.pdf`);
         setMostrarMenuExportar(false);

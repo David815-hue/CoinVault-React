@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, Edit2, Heart, Trash2, ZoomIn, Sparkles } from 'lucide-react';
+import { Camera, Edit2, Heart, Trash2, ZoomIn, Sparkles, RotateCw } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 import ModalAIInfo from './ModalAIInfo';
@@ -8,6 +8,7 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
     const { modoOscuro } = useTheme();
     const { toggleFavorito, eliminarItem } = useCollection();
     const [showAI, setShowAI] = useState(false);
+    const [isFlipped, setIsFlipped] = useState(false);
     const esMoneda = tipo === 'monedas';
 
     const handleEditar = () => {
@@ -19,6 +20,11 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
         if (window.confirm(`¿Estás seguro de eliminar esta ${esMoneda ? 'moneda' : 'billete'}?`)) {
             eliminarItem(item.id, tipo);
         }
+    };
+
+    const toggleFlip = (e) => {
+        e.stopPropagation();
+        setIsFlipped(!isFlipped);
     };
 
     return (
@@ -33,41 +39,62 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
                 />
             </button>
 
-            <div className={`grid grid-cols-2 gap-1 p-1 ${modoOscuro ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
-                {item.fotoFrontal ? (
-                    <div className="relative group/img overflow-hidden rounded-xl">
-                        <img
-                            src={item.fotoFrontal}
-                            alt="Frontal"
-                            className="w-full h-40 object-cover cursor-pointer transition-transform duration-500 group-hover/img:scale-110"
-                            onClick={() => setImagenZoom(item.fotoFrontal)}
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-all flex items-center justify-center">
-                            <ZoomIn className="text-white opacity-0 group-hover/img:opacity-100 transition-all transform scale-50 group-hover/img:scale-100" size={24} />
-                        </div>
+            {/* 3D Flip Container */}
+            <div className="perspective-1000 h-48 w-full relative group/flip cursor-pointer" onClick={toggleFlip}>
+                <div className={`w-full h-full transition-transform duration-700 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+
+                    {/* Front Side */}
+                    <div className="absolute w-full h-full backface-hidden">
+                        {item.fotoFrontal ? (
+                            <div className="relative w-full h-full">
+                                <img
+                                    src={item.fotoFrontal}
+                                    alt="Frontal"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover/flip:bg-black/10 transition-all flex items-center justify-center">
+                                    <RotateCw className="text-white opacity-0 group-hover/flip:opacity-100 transition-all transform scale-50 group-hover/flip:scale-100 drop-shadow-lg" size={32} />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className={`w-full h-full ${modoOscuro ? 'bg-slate-700' : 'bg-slate-200'} flex items-center justify-center`}>
+                                <Camera size={32} className="text-slate-400" />
+                            </div>
+                        )}
                     </div>
-                ) : (
-                    <div className={`w-full h-40 ${modoOscuro ? 'bg-slate-700' : 'bg-slate-200'} rounded-xl flex items-center justify-center`}>
-                        <Camera size={32} className="text-slate-400" />
+
+                    {/* Back Side */}
+                    <div className="absolute w-full h-full backface-hidden rotate-y-180">
+                        {item.fotoTrasera ? (
+                            <div className="relative w-full h-full">
+                                <img
+                                    src={item.fotoTrasera}
+                                    alt="Trasera"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover/flip:bg-black/10 transition-all flex items-center justify-center">
+                                    <RotateCw className="text-white opacity-0 group-hover/flip:opacity-100 transition-all transform scale-50 group-hover/flip:scale-100 drop-shadow-lg" size={32} />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className={`w-full h-full ${modoOscuro ? 'bg-slate-700' : 'bg-slate-200'} flex items-center justify-center`}>
+                                <span className="text-slate-400 text-sm">Sin reverso</span>
+                            </div>
+                        )}
                     </div>
-                )}
-                {item.fotoTrasera ? (
-                    <div className="relative group/img overflow-hidden rounded-xl">
-                        <img
-                            src={item.fotoTrasera}
-                            alt="Trasera"
-                            className="w-full h-40 object-cover cursor-pointer transition-transform duration-500 group-hover/img:scale-110"
-                            onClick={() => setImagenZoom(item.fotoTrasera)}
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-all flex items-center justify-center">
-                            <ZoomIn className="text-white opacity-0 group-hover/img:opacity-100 transition-all transform scale-50 group-hover/img:scale-100" size={24} />
-                        </div>
-                    </div>
-                ) : (
-                    <div className={`w-full h-40 ${modoOscuro ? 'bg-slate-700' : 'bg-slate-200'} rounded-xl flex items-center justify-center`}>
-                        <Camera size={32} className="text-slate-400" />
-                    </div>
-                )}
+                </div>
+
+                {/* Zoom Button (Separate from flip) */}
+                <button
+                    className="absolute bottom-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white z-20 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setImagenZoom(isFlipped ? item.fotoTrasera : item.fotoFrontal);
+                    }}
+                    title="Zoom"
+                >
+                    <ZoomIn size={16} />
+                </button>
             </div>
 
             <div className="p-5">

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import localforage from 'localforage';
+import { initDB, getItems, addItem, updateItem, deleteItem, toggleFavoritoDB, getAlbums, createAlbum, deleteAlbum, getAlbumItems } from '../services/platformDB';
 
 const CollectionContext = createContext();
 
@@ -15,72 +16,107 @@ export const CollectionProvider = ({ children }) => {
     const [monedas, setMonedas] = useState([]);
     const [billetes, setBilletes] = useState([]);
     const [wishlist, setWishlist] = useState([]);
+    const [albums, setAlbums] = useState([]);
     const [cargando, setCargando] = useState(true);
 
+    const refreshData = async () => {
+        try {
+            const [monedasData, billetesData, wishlistData, albumsData] = await Promise.all([
+                getItems('monedas'),
+                getItems('billetes'),
+                getItems('wishlist'),
+                getAlbums()
+            ]);
+            setMonedas(monedasData);
+            setBilletes(billetesData);
+            setWishlist(wishlistData);
+            setAlbums(albumsData);
+        } catch (error) {
+            console.error('Error refreshing data:', error);
+        }
+    };
+
     useEffect(() => {
-        cargarDatos();
+        const init = async () => {
+            try {
+                await initDB();
+
+                // Check if migration is needed
+                const existingMonedas = await getItems('monedas');
+                const existingBilletes = await getItems('billetes');
+
+                if (existingMonedas.length === 0 && existingBilletes.length === 0) {
+                    console.log('Checking for localForage data to migrate...');
+                    const savedMonedas = await localforage.getItem('coleccion-monedas');
+                    const savedBilletes = await localforage.getItem('coleccion-billetes');
+                    const savedWishlist = await localforage.getItem('coleccion-wishlist');
+
+                    if (savedMonedas && Array.isArray(savedMonedas)) {
+                        console.log(`Migrating ${savedMonedas.length} coins...`);
+                        for (const m of savedMonedas) await addItem(m, 'monedas');
+                    }
+                    if (savedBilletes && Array.isArray(savedBilletes)) {
+                        console.log(`Migrating ${savedBilletes.length} bills...`);
+                        for (const b of savedBilletes) await addItem(b, 'billetes');
+                    }
+                    if (savedWishlist && Array.isArray(savedWishlist)) {
+                        console.log(`Migrating ${savedWishlist.length} wishlist items...`);
+                        for (const w of savedWishlist) await addItem(w, 'wishlist');
+                    }
+                }
+
+                await refreshData();
+            } catch (error) {
+                console.error('Error initializing DB:', error);
+            } finally {
+                setCargando(false);
+            }
+        };
+        init();
     }, []);
 
-    const cargarDatos = async () => {
+    const agregarItem = async (item, tipo) => {
         try {
-            const savedMonedas = await localforage.getItem('coleccion-monedas');
-            const savedBilletes = await localforage.getItem('coleccion-billetes');
-            const savedWishlist = await localforage.getItem('coleccion-wishlist');
-
-            if (savedMonedas) {
-                setMonedas(savedMonedas);
-            }
-            if (savedBilletes) {
-                setBilletes(savedBilletes);
-            }
-            if (savedWishlist) {
-                setWishlist(savedWishlist);
-            }
+            await addItem(item, tipo);
+            await refreshData();
+            return true;
         } catch (error) {
-            console.log('Primera vez usando la app o error al cargar:', error);
-        } finally {
-            setCargando(false);
+            console.error('Error adding item:', error);
+            return false;
         }
     };
 
-    const guardarMonedas = async (nuevasMonedas) => {
+    const actualizarItem = async (item) => {
         try {
-            await localforage.setItem('coleccion-monedas', nuevasMonedas);
-            setMonedas(nuevasMonedas);
+            await updateItem(item);
+            await refreshData();
+            return true;
         } catch (error) {
-            console.error('Error al guardar:', error);
-            alert('Error al guardar. Intenta de nuevo.');
+            console.error('Error updating item:', error);
+            return false;
         }
     };
 
-    const guardarBilletes = async (nuevosBilletes) => {
+    const eliminarItem = async (id) => {
         try {
-            await localforage.setItem('coleccion-billetes', nuevosBilletes);
-            setBilletes(nuevosBilletes);
+            await deleteItem(id);
+            await refreshData();
+            return true;
         } catch (error) {
-            console.error('Error al guardar:', error);
-            alert('Error al guardar. Intenta de nuevo.');
-        }
-    };
-
-    const guardarWishlist = async (nuevaWishlist) => {
-        try {
-            await localforage.setItem('coleccion-wishlist', nuevaWishlist);
-            setWishlist(nuevaWishlist);
-        } catch (error) {
-            console.error('Error al guardar wishlist:', error);
+            console.error('Error deleting item:', error);
+            return false;
         }
     };
 
     const addToWishlist = async (item) => {
         const newItem = { ...item, id: Date.now().toString() };
-        const newWishlist = [...wishlist, newItem];
-        await guardarWishlist(newWishlist);
+        await addItem(newItem, 'wishlist');
+        await refreshData();
     };
 
     const removeFromWishlist = async (id) => {
-        const newWishlist = wishlist.filter(item => item.id !== id);
-        await guardarWishlist(newWishlist);
+        await deleteItem(id);
+        await refreshData();
     };
 
     const downloadWishlist = () => {
@@ -100,16 +136,11 @@ export const CollectionProvider = ({ children }) => {
     };
 
     const toggleFavorito = async (id, tipo) => {
-        if (tipo === 'monedas') {
-            const nuevasMonedas = monedas.map(m =>
-                m.id === id ? { ...m, favorito: !m.favorito } : m
-            );
-            await guardarMonedas(nuevasMonedas);
-        } else {
-            const nuevosBilletes = billetes.map(b =>
-                b.id === id ? { ...b, favorito: !b.favorito } : b
-            );
-            await guardarBilletes(nuevosBilletes);
+        const list = tipo === 'monedas' ? monedas : billetes;
+        const item = list.find(i => i.id === id);
+        if (item) {
+            await toggleFavoritoDB(id, !item.favorito);
+            await refreshData();
         }
     };
 
@@ -146,16 +177,23 @@ export const CollectionProvider = ({ children }) => {
     };
 
     const importarBackup = async (file) => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
 
-                    if (data.monedas) await guardarMonedas(data.monedas);
-                    if (data.billetes) await guardarBilletes(data.billetes);
-                    if (data.wishlist) await guardarWishlist(data.wishlist);
+                    if (data.monedas) {
+                        for (const m of data.monedas) await addItem(m, 'monedas');
+                    }
+                    if (data.billetes) {
+                        for (const b of data.billetes) await addItem(b, 'billetes');
+                    }
+                    if (data.wishlist) {
+                        for (const w of data.wishlist) await addItem(w, 'wishlist');
+                    }
 
+                    await refreshData();
                     resolve({ success: true, message: 'Backup restaurado correctamente' });
                 } catch (error) {
                     console.error('Error al importar backup:', error);
@@ -167,20 +205,56 @@ export const CollectionProvider = ({ children }) => {
         });
     };
 
+    const crearNuevoAlbum = async (album) => {
+        try {
+            await createAlbum(album);
+            await refreshData();
+            return true;
+        } catch (error) {
+            console.error('Error creating album:', error);
+            return false;
+        }
+    };
+
+    const eliminarAlbumExistente = async (id) => {
+        try {
+            await deleteAlbum(id);
+            await refreshData();
+            return true;
+        } catch (error) {
+            console.error('Error deleting album:', error);
+            return false;
+        }
+    };
+
+    const obtenerItemsAlbum = async (albumId) => {
+        try {
+            return await getAlbumItems(albumId);
+        } catch (error) {
+            console.error('Error fetching album items:', error);
+            return [];
+        }
+    };
+
     const value = {
         monedas,
         billetes,
         wishlist,
+        albums,
         cargando,
-        guardarMonedas,
-        guardarBilletes,
+        agregarItem,
+        actualizarItem,
+        eliminarItem,
         addToWishlist,
         removeFromWishlist,
         downloadWishlist,
         toggleFavorito,
         calcularValorTotal,
         exportarBackup,
-        importarBackup
+        importarBackup,
+        crearNuevoAlbum,
+        eliminarAlbumExistente,
+        obtenerItemsAlbum
     };
 
     return (

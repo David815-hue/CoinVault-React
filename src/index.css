@@ -156,3 +156,35 @@ body {
   transform: translateY(-4px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
+
+/* 3D Flip Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Mobile-Friendly Utilities */
+@media (hover: none) and (pointer: coarse) {
+
+  /* On touch devices, always show card buttons */
+  .card-hover .opacity-0 {
+    opacity: 1 !important;
+  }
+
+  /* Reduce hover-based transforms for better mobile experience */
+  .card-hover:hover {
+    transform: none;
+  }
+}

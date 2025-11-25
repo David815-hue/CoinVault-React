@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Coins, Banknote, Globe, Heart, DollarSign, BarChart3, Star, X } from 'lucide-react';
+import { Coins, Banknote, Globe, Heart, DollarSign, BarChart3, Star, X, Book } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 import MapaMundial from './MapaMundial';
 
 const Dashboard = ({ setVista, setMostrarFavoritos }) => {
     const { modoOscuro } = useTheme();
-    const { monedas, billetes, calcularValorTotal } = useCollection();
+    const { monedas, billetes, albums, calcularValorTotal } = useCollection();
     const [paisSeleccionado, setPaisSeleccionado] = useState(null);
 
     const contarPorPais = (items) => {
@@ -37,7 +37,7 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {/* Monedas Card */}
                     <div
                         onClick={() => setVista('monedas')}
@@ -101,6 +101,36 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
                                 <div className={`flex items-center gap-2 text-sm ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>
                                     <Heart size={16} />
                                     <span>{billetes.filter(b => b.favorito).length} favoritos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Álbumes Card */}
+                    <div
+                        onClick={() => setVista('albumes')}
+                        className={`relative overflow-hidden rounded-3xl p-8 cursor-pointer transition-all duration-300 group ${modoOscuro
+                            ? 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/10 border border-indigo-500/20 hover:border-indigo-500/40'
+                            : 'bg-white border border-slate-200 hover:border-indigo-200 shadow-xl shadow-slate-200/50'
+                            } hover:transform hover:-translate-y-2`}
+                    >
+                        <div className={`absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity ${modoOscuro ? 'text-indigo-500' : 'text-indigo-600'}`}>
+                            <Book size={120} />
+                        </div>
+
+                        <div className="relative z-10">
+                            <div className={`inline-flex p-3 rounded-2xl mb-6 ${modoOscuro ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'}`}>
+                                <Book size={32} />
+                            </div>
+                            <h2 className={`text-3xl font-bold mb-2 ${modoOscuro ? 'text-white' : 'text-slate-800'}`}>Álbumes</h2>
+                            <div className={`text-5xl font-bold mb-6 ${modoOscuro ? 'text-indigo-400' : 'text-indigo-500'}`}>
+                                {albums.length}
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className={`flex items-center gap-2 text-sm ${modoOscuro ? 'text-slate-400' : 'text-slate-500'}`}>
+                                    <Star size={16} />
+                                    <span>Colecciones temáticas</span>
                                 </div>
                             </div>
                         </div>

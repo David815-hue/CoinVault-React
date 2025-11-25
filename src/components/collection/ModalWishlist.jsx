@@ -36,7 +36,7 @@ const ModalWishlist = ({ onClose }) => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h2 className={`text-2xl font-bold ${modoOscuro ? 'text-white' : 'text-gray-800'} flex items-center gap-2`}>
-                        <List className="text-indigo-500" size={32} />
+                        <List className="text-[var(--color-primary)]" size={32} />
                         Lista de Deseos
                     </h2>
                     <button
@@ -73,7 +73,7 @@ const ModalWishlist = ({ onClose }) => {
                     </div>
                     <button
                         onClick={handleAdd}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors"
+                        className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors"
                     >
                         <Plus size={18} />
                         Agregar a la Lista
