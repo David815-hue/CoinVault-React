@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
-import { X, Plus, Trash2, Download, List } from 'lucide-react';
+import { X, Plus, Trash2, Download, List, FileText, FileSpreadsheet, File } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 import CountrySelect from '../common/CountrySelect';
 import { PAISES } from '../../utils/constants';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 const ModalWishlist = ({ onClose }) => {
     const { modoOscuro } = useTheme();
-    const { wishlist, addToWishlist, removeFromWishlist, downloadWishlist } = useCollection();
+    const { wishlist, addToWishlist, removeFromWishlist } = useCollection();
+    const [mostrarMenuExportar, setMostrarMenuExportar] = useState(false);
 
     const [newItem, setNewItem] = useState({
         nombre: '',
@@ -22,6 +29,108 @@ const ModalWishlist = ({ onClose }) => {
         }
         addToWishlist(newItem);
         setNewItem({ nombre: '', pais: '', denominacion: '' });
+    };
+
+    const saveAndShareFile = async (fileName, data, mimeType, isBase64 = false) => {
+        if (Capacitor.isNativePlatform()) {
+            try {
+                const savedFile = await Filesystem.writeFile({
+                    path: fileName,
+                    data: data,
+                    directory: Directory.Cache,
+                    encoding: isBase64 ? undefined : Encoding.UTF8
+                });
+
+                await Share.share({
+                    title: 'Compartir Lista de Deseos',
+                    text: 'Aquí está mi lista de deseos de CoinVault',
+                    url: savedFile.uri,
+                    dialogTitle: 'Compartir archivo'
+                });
+            } catch (error) {
+                console.error('Error saving/sharing file:', error);
+                alert('Error al guardar el archivo. Verifica los permisos.');
+            }
+        } else {
+            // Web fallback
+            const blob = isBase64
+                ? await (await fetch(`data:${mimeType};base64,${data}`)).blob()
+                : new Blob([data], { type: mimeType });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    };
+
+    const exportarTxt = async () => {
+        const textContent = wishlist.map(item =>
+            `Nombre: ${item.nombre}\nPaís: ${item.pais}\nDenominación: ${item.denominacion}\n-------------------`
+        ).join('\n\n');
+
+        await saveAndShareFile('wishlist.txt', textContent, 'text/plain');
+        setMostrarMenuExportar(false);
+    };
+
+    const exportarExcel = async () => {
+        const data = wishlist.map(item => ({
+            Nombre: item.nombre,
+            País: item.pais,
+            Denominación: item.denominacion
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Wishlist");
+
+        // Get base64 for mobile
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+
+        await saveAndShareFile(
+            `wishlist_${new Date().toISOString().slice(0, 10)}.xlsx`,
+            wbout,
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            true
+        );
+        setMostrarMenuExportar(false);
+    };
+
+    const exportarPDF = async () => {
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text('Mi Lista de Deseos - CoinVault', 14, 22);
+        doc.setFontSize(11);
+        doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 30);
+
+        const tableColumn = ["Nombre", "País", "Denominación"];
+        const tableRows = wishlist.map(item => [
+            item.nombre,
+            item.pais,
+            item.denominacion
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 40,
+        });
+
+        // Get base64 for mobile
+        const pdfOutput = doc.output('datauristring').split(',')[1];
+
+        await saveAndShareFile(
+            `wishlist_${new Date().toISOString().slice(0, 10)}.pdf`,
+            pdfOutput,
+            'application/pdf',
+            true
+        );
+        setMostrarMenuExportar(false);
     };
 
     return (
@@ -114,17 +223,43 @@ const ModalWishlist = ({ onClose }) => {
 
                 {/* Footer Actions */}
                 {wishlist.length > 0 && (
-                    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 relative">
                         <button
-                            onClick={downloadWishlist}
+                            onClick={() => setMostrarMenuExportar(!mostrarMenuExportar)}
                             className={`w-full py-3 rounded-lg border-2 font-semibold flex items-center justify-center gap-2 transition-colors ${modoOscuro
                                 ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
                                 : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                                 }`}
                         >
                             <Download size={20} />
-                            Descargar Lista de Deseos
+                            Exportar Lista de Deseos
                         </button>
+
+                        {mostrarMenuExportar && (
+                            <div className={`absolute bottom-full left-0 right-0 mb-2 rounded-xl shadow-lg overflow-hidden border ${modoOscuro ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                <button
+                                    onClick={exportarTxt}
+                                    className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-opacity-50 ${modoOscuro ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                >
+                                    <File size={18} className="text-gray-500" />
+                                    Texto (.txt)
+                                </button>
+                                <button
+                                    onClick={exportarExcel}
+                                    className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-opacity-50 ${modoOscuro ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                >
+                                    <FileSpreadsheet size={18} className="text-green-600" />
+                                    Excel (.xlsx)
+                                </button>
+                                <button
+                                    onClick={exportarPDF}
+                                    className={`w-full px-4 py-3 text-left flex items-center gap-3 hover:bg-opacity-50 ${modoOscuro ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                                >
+                                    <FileText size={18} className="text-red-600" />
+                                    PDF (.pdf)
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

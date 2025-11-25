@@ -12,7 +12,10 @@ const NavBar = ({ vista, setVista, setMostrarWishlist, setMostrarTemas }) => {
     ];
 
     return (
-        <nav className={`fixed bottom-0 left-0 right-0 ${modoOscuro ? 'bg-gray-900/90 border-gray-800' : 'bg-white/90 border-gray-200'} backdrop-blur-lg border-t shadow-lg z-50 transition-all duration-300`}
+        <nav className={`fixed bottom-0 left-0 right-0 ${modoOscuro
+            ? 'bg-gray-900/60 border-white/10 shadow-[0_-4px_30px_rgba(0,0,0,0.5)]'
+            : 'bg-white/60 border-white/40 shadow-[0_-4px_30px_rgba(0,0,0,0.1)]'
+            } backdrop-blur-xl border-t z-50 transition-all duration-300 pb-safe`}
         >
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex justify-around items-center h-20">

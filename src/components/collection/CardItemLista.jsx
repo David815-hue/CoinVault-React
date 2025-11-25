@@ -22,7 +22,7 @@ const CardItemLista = ({ item, tipo, setVista, setItemEditando, setImagenZoom })
     };
 
     return (
-        <div className={`p-4 rounded-xl shadow-md hover:shadow-lg transition-all ${modoOscuro ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className={`p-4 rounded-xl shadow-md hover:shadow-lg transition-all ${modoOscuro ? 'bg-gray-800' : 'bg-white/90 backdrop-blur-sm'}`}>
             <div className="flex items-center gap-4">
                 {/* Imagen miniatura */}
                 <div className="flex-shrink-0">

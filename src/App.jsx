@@ -12,6 +12,8 @@ import ModalWishlist from './components/collection/ModalWishlist';
 import ModalTemas from './components/layout/ModalTemas';
 import Slideshow from './components/collection/Slideshow';
 import VistaAlbumes from './components/albums/VistaAlbumes';
+import { StatusBar } from '@capacitor/status-bar';
+import { Capacitor } from '@capacitor/core';
 
 const MainContent = () => {
   const { modoOscuro, toggleModoOscuro } = useTheme();
@@ -31,6 +33,12 @@ const MainContent = () => {
     setTipoSlideshow(tipo);
     setModoSlideshow(true);
   };
+
+  React.useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.hide().catch(console.error);
+    }
+  }, []);
 
   if (cargando) {
     return (

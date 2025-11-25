@@ -28,7 +28,7 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
     };
 
     return (
-        <div className={`relative group rounded-2xl overflow-hidden transition-all duration-300 card-hover ${modoOscuro ? 'bg-slate-800 shadow-xl shadow-slate-900/50' : 'bg-white shadow-lg shadow-slate-200/50'}`}>
+        <div className={`relative group rounded-2xl overflow-hidden transition-all duration-300 card-hover ${modoOscuro ? 'bg-slate-800 shadow-xl shadow-slate-900/50' : 'bg-white/90 backdrop-blur-sm shadow-lg shadow-slate-200/50'}`}>
             <button
                 onClick={() => toggleFavorito(item.id, tipo)}
                 className="absolute top-3 right-3 z-10 p-2 rounded-full shadow-lg hover:scale-110 transition-transform glass"

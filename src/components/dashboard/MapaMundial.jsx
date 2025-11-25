@@ -69,13 +69,13 @@ const MapaMundial = ({ datos, tipo, titulo, setPaisSeleccionado }) => {
             </div>
 
             <div className="relative">
-                <div className={`rounded-xl overflow-hidden border ${modoOscuro ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-blue-50'}`} style={{ height: "200px" }}>
+                <div className={`rounded-xl overflow-hidden border ${modoOscuro ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-blue-50'}`} style={{ height: "250px" }}>
                     <ComposableMap
                         projectionConfig={{
                             rotate: [-10, 0, 0],
-                            scale: 147
+                            scale: 240
                         }}
-                        height={200}
+                        height={600}
                     >
                         <ZoomableGroup
                             zoom={position.zoom}

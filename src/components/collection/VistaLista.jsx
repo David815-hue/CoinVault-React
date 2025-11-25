@@ -10,6 +10,9 @@ import CountrySelect from '../common/CountrySelect';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, iniciarSlideshow }) => {
     const { modoOscuro } = useTheme();
@@ -68,7 +71,63 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
     const materialesUnicos = [...new Set(items.map(i => i.material))].filter(Boolean);
     const filtrosActivos = Object.values(filtros).some(f => f !== '');
 
-    const exportarExcel = () => {
+    const saveAndShareFile = async (fileName, data, mimeType, isBase64 = false) => {
+        if (Capacitor.isNativePlatform()) {
+            try {
+                const savedFile = await Filesystem.writeFile({
+                    path: fileName,
+                    data: data,
+                    directory: Directory.Cache,
+                    encoding: isBase64 ? undefined : Encoding.UTF8
+                });
+
+                await Share.share({
+                    title: `Compartir Reporte de ${esMoneda ? 'Monedas' : 'Billetes'}`,
+                    text: `Aquí está mi reporte de ${esMoneda ? 'monedas' : 'billetes'} de CoinVault`,
+                    url: savedFile.uri,
+                    dialogTitle: 'Compartir archivo'
+                });
+            } catch (error) {
+                console.error('Error saving/sharing file:', error);
+                alert('Error al guardar el archivo. Verifica los permisos.');
+            }
+        } else {
+            // Web fallback
+            if (mimeType === 'application/pdf') {
+                // For PDF in web, doc.save() is handled by jsPDF, but here we receive base64 or blob?
+                // Actually, for PDF web, we can just use doc.save() inside the export function.
+                // But to unify, let's keep the logic inside export functions for web specific parts if needed.
+                // However, the helper is useful.
+                const blob = isBase64
+                    ? await (await fetch(`data:${mimeType};base64,${data}`)).blob()
+                    : new Blob([data], { type: mimeType });
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                // Excel web download is handled by XLSX.writeFile usually, but we can do blob too
+                const blob = isBase64
+                    ? await (await fetch(`data:${mimeType};base64,${data}`)).blob()
+                    : new Blob([data], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+    };
+
+    const exportarExcel = async () => {
         const data = itemsFiltrados.map(item => ({
             Nombre: item.nombre,
             País: item.pais,
@@ -83,7 +142,18 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, esMoneda ? "Monedas" : "Billetes");
-        XLSX.writeFile(wb, `Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+        if (Capacitor.isNativePlatform()) {
+            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+            await saveAndShareFile(
+                `Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                wbout,
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                true
+            );
+        } else {
+            XLSX.writeFile(wb, `Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
         setMostrarMenuExportar(false);
     };
 
@@ -143,7 +213,17 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
             yPosition += itemHeight + 10;
         }
 
-        doc.save(`Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.pdf`);
+        if (Capacitor.isNativePlatform()) {
+            const pdfOutput = doc.output('datauristring').split(',')[1];
+            await saveAndShareFile(
+                `Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.pdf`,
+                pdfOutput,
+                'application/pdf',
+                true
+            );
+        } else {
+            doc.save(`Coleccion_${esMoneda ? 'Monedas' : 'Billetes'}_${new Date().toISOString().slice(0, 10)}.pdf`);
+        }
         setMostrarMenuExportar(false);
     };
 
@@ -169,7 +249,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                 </button>
 
                 <div className={`${modoOscuro ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-xl p-6 mb-6`}>
-                    <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                         <h1 className={`text-3xl font-bold ${modoOscuro ? 'text-white' : 'text-gray-800'} flex items-center gap-3`}>
                             {esMoneda ? (
                                 <>
@@ -186,6 +266,31 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                         </h1>
 
                         <div className="flex gap-2">
+                            <button
+                                onClick={() => setVistaDisplay(vistaDisplay === 'cuadricula' ? 'lista' : 'cuadricula')}
+                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
+                                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                title={vistaDisplay === 'cuadricula' ? 'Vista de lista' : 'Vista de cuadrícula'}
+                            >
+                                {vistaDisplay === 'cuadricula' ? <List size={20} /> : <Grid size={20} />}
+                            </button>
+
+                            <button
+                                onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${filtrosActivos
+                                    ? 'bg-purple-600 text-white'
+                                    : modoOscuro
+                                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                            >
+                                <Filter size={20} />
+                                <span className="hidden sm:inline">Filtros</span>
+                                {filtrosActivos && <span className="bg-white text-purple-600 text-xs px-1.5 py-0.5 rounded-full">{Object.values(filtros).filter(f => f !== '').length}</span>}
+                            </button>
+
                             <div className="relative">
                                 <button
                                     onClick={() => setMostrarMenuExportar(!mostrarMenuExportar)}
@@ -216,31 +321,6 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                     </div>
                                 )}
                             </div>
-
-                            <button
-                                onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${filtrosActivos
-                                    ? 'bg-purple-600 text-white'
-                                    : modoOscuro
-                                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                            >
-                                <Filter size={20} />
-                                <span className="hidden sm:inline">Filtros</span>
-                                {filtrosActivos && <span className="bg-white text-purple-600 text-xs px-1.5 py-0.5 rounded-full">{Object.values(filtros).filter(f => f !== '').length}</span>}
-                            </button>
-
-                            <button
-                                onClick={() => setVistaDisplay(vistaDisplay === 'cuadricula' ? 'lista' : 'cuadricula')}
-                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
-                                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                                title={vistaDisplay === 'cuadricula' ? 'Vista de lista' : 'Vista de cuadrícula'}
-                            >
-                                {vistaDisplay === 'cuadricula' ? <List size={20} /> : <Grid size={20} />}
-                            </button>
 
                             <button
                                 onClick={() => setSlideshowActivo(true)}
