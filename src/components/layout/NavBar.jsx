@@ -2,7 +2,7 @@ import React from 'react';
 import { Home, Coins, Banknote, List, Palette } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 
-const NavBar = ({ vista, setVista, setMostrarWishlist, setMostrarTemas }) => {
+const NavBar = ({ vista, setVista, setMostrarTemas }) => {
     const { modoOscuro } = useTheme();
 
     const navItems = [
@@ -36,13 +36,15 @@ const NavBar = ({ vista, setVista, setMostrarWishlist, setMostrarTemas }) => {
                     ))}
 
                     <button
-                        onClick={() => setMostrarWishlist(true)}
-                        className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 group ${modoOscuro
-                            ? 'text-gray-400 hover:text-gray-200'
-                            : 'text-gray-500 hover:text-gray-900'
+                        onClick={() => setVista('wishlist')}
+                        className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 group ${vista === 'wishlist'
+                            ? 'text-[var(--color-primary)] transform -translate-y-1'
+                            : modoOscuro
+                                ? 'text-gray-400 hover:text-gray-200'
+                                : 'text-gray-500 hover:text-gray-900'
                             }`}
                     >
-                        <List size={24} className="mb-1 transition-transform group-hover:scale-110" />
+                        <List size={24} className={`mb-1 transition-transform group-hover:scale-110 ${vista === 'wishlist' ? 'fill-current' : ''}`} />
                         <span className="text-xs font-medium">Deseos</span>
                     </button>
 

@@ -28,15 +28,6 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
     return (
         <div className={`min-h-screen ${modoOscuro ? 'bg-slate-900' : 'bg-slate-50'} p-4 md:p-8 pb-40 transition-colors duration-300`}>
             <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-12 animate-fade-in">
-                    <h1 className={`text-4xl md:text-6xl font-bold ${modoOscuro ? 'text-white' : 'text-slate-900'} mb-4 tracking-tight`}>
-                        CoinVault
-                    </h1>
-                    <p className={`text-lg ${modoOscuro ? 'text-slate-400' : 'text-slate-500'} font-light`}>
-                        Gestiona tu colección numismática con elegancia
-                    </p>
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {/* Monedas Card */}
                     <div

@@ -8,7 +8,7 @@ import VistaLista from './components/collection/VistaLista';
 import Formulario from './components/editor/Formulario';
 import ModalZoom from './components/collection/ModalZoom';
 import ModalFavoritos from './components/collection/ModalFavoritos';
-import ModalWishlist from './components/collection/ModalWishlist';
+import VistaWishlist from './components/collection/VistaWishlist';
 import ModalTemas from './components/layout/ModalTemas';
 import Slideshow from './components/collection/Slideshow';
 import VistaAlbumes from './components/albums/VistaAlbumes';
@@ -24,7 +24,6 @@ const MainContent = () => {
   const [itemEditando, setItemEditando] = useState(null);
   const [imagenZoom, setImagenZoom] = useState(null);
   const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
-  const [mostrarWishlist, setMostrarWishlist] = useState(false);
   const [mostrarTemas, setMostrarTemas] = useState(false);
   const [modoSlideshow, setModoSlideshow] = useState(false);
   const [tipoSlideshow, setTipoSlideshow] = useState('monedas');
@@ -56,7 +55,6 @@ const MainContent = () => {
       <NavBar
         vista={vista}
         setVista={setVista}
-        setMostrarWishlist={setMostrarWishlist}
         setMostrarTemas={setMostrarTemas}
       />
 
@@ -94,6 +92,12 @@ const MainContent = () => {
         <VistaAlbumes />
       )}
 
+      {vista === 'wishlist' && (
+        <VistaWishlist
+          setVista={setVista}
+        />
+      )}
+
       {vista === 'formulario' && (
         <Formulario
           tipoFormulario={tipoFormulario}
@@ -120,11 +124,7 @@ const MainContent = () => {
         />
       )}
 
-      {mostrarWishlist && (
-        <ModalWishlist
-          onClose={() => setMostrarWishlist(false)}
-        />
-      )}
+
 
       {mostrarTemas && (
         <ModalTemas

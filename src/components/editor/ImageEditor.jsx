@@ -6,11 +6,28 @@ import { Save, X, RotateCw, ZoomIn, ZoomOut } from 'lucide-react';
 const ImageEditor = ({ imagen, onSave, onCancel, esMoneda, modoOscuro }) => {
     const cropperRef = useRef(null);
 
+    const getRoundedCanvas = (sourceCanvas) => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const width = sourceCanvas.width;
+        const height = sourceCanvas.height;
+
+        canvas.width = width;
+        canvas.height = height;
+        context.imageSmoothingEnabled = true;
+        context.drawImage(sourceCanvas, 0, 0, width, height);
+        context.globalCompositeOperation = 'destination-in';
+        context.beginPath();
+        context.arc(width / 2, height / 2, Math.min(width, height) / 2, 0, 2 * Math.PI, true);
+        context.fill();
+        return canvas;
+    };
+
     const onCrop = () => {
         const cropper = cropperRef.current?.cropper;
         if (cropper) {
             // Obtener la imagen recortada como base64
-            const croppedCanvas = cropper.getCroppedCanvas({
+            let croppedCanvas = cropper.getCroppedCanvas({
                 width: esMoneda ? 500 : 800, // Tamaño máximo sugerido
                 height: esMoneda ? 500 : undefined,
                 imageSmoothingEnabled: true,
@@ -18,6 +35,9 @@ const ImageEditor = ({ imagen, onSave, onCancel, esMoneda, modoOscuro }) => {
             });
 
             if (croppedCanvas) {
+                if (esMoneda) {
+                    croppedCanvas = getRoundedCanvas(croppedCanvas);
+                }
                 onSave(croppedCanvas.toDataURL());
             }
         }

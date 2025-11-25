@@ -40,56 +40,54 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
             </button>
 
             {/* 3D Flip Container */}
-            <div className="perspective-1000 h-48 w-full relative group/flip cursor-pointer" onClick={toggleFlip}>
-                <div className={`w-full h-full transition-transform duration-700 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-
-                    {/* Front Side */}
-                    <div className="absolute w-full h-full backface-hidden">
-                        {item.fotoFrontal ? (
-                            <div className={`relative w-full h-full ${modoOscuro ? 'bg-slate-900' : 'bg-slate-100'}`}>
-                                <img
-                                    src={item.fotoFrontal}
-                                    alt="Frontal"
-                                    className={`w-full h-full ${esMoneda ? 'object-contain p-3' : 'object-cover'}`}
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover/flip:bg-black/10 transition-all flex items-center justify-center">
-                                    <RotateCw className="text-white opacity-0 group-hover/flip:opacity-100 transition-all transform scale-50 group-hover/flip:scale-100 drop-shadow-lg" size={32} />
+            <div className="h-48 w-full relative">
+                <div
+                    className="h-48 w-full cursor-pointer perspective-1000"
+                    onClick={toggleFlip}
+                >
+                    <div className={`w-full h-full relative transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                        {/* Front Face */}
+                        <div className="absolute w-full h-full backface-hidden">
+                            {item.fotoFrontal ? (
+                                <div className={`relative w-full h-full ${modoOscuro ? 'bg-slate-900' : 'bg-slate-100'}`}>
+                                    <img
+                                        src={item.fotoFrontal}
+                                        alt="Frontal"
+                                        className={`w-full h-full ${esMoneda ? 'object-contain p-3' : 'object-cover'}`}
+                                    />
                                 </div>
-                            </div>
-                        ) : (
-                            <div className={`w-full h-full ${modoOscuro ? 'bg-slate-700' : 'bg-slate-200'} flex items-center justify-center`}>
-                                <Camera size={32} className="text-slate-400" />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Back Side */}
-                    <div className="absolute w-full h-full backface-hidden rotate-y-180">
-                        {item.fotoTrasera ? (
-                            <div className={`relative w-full h-full ${modoOscuro ? 'bg-slate-900' : 'bg-slate-100'}`}>
-                                <img
-                                    src={item.fotoTrasera}
-                                    alt="Trasera"
-                                    className={`w-full h-full ${esMoneda ? 'object-contain p-3' : 'object-cover'}`}
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover/flip:bg-black/10 transition-all flex items-center justify-center">
-                                    <RotateCw className="text-white opacity-0 group-hover/flip:opacity-100 transition-all transform scale-50 group-hover/flip:scale-100 drop-shadow-lg" size={32} />
+                            ) : (
+                                <div className={`w-full h-full ${modoOscuro ? 'bg-slate-700' : 'bg-slate-200'} flex items-center justify-center`}>
+                                    <Camera size={32} className="text-slate-400" />
                                 </div>
-                            </div>
-                        ) : (
-                            <div className={`w-full h-full ${modoOscuro ? 'bg-slate-700' : 'bg-slate-200'} flex items-center justify-center`}>
-                                <span className="text-slate-400 text-sm">Sin reverso</span>
-                            </div>
-                        )}
+                            )}
+                        </div>
+
+                        {/* Back Face */}
+                        <div className="absolute w-full h-full backface-hidden rotate-y-180">
+                            {item.fotoTrasera ? (
+                                <div className={`relative w-full h-full ${modoOscuro ? 'bg-slate-900' : 'bg-slate-100'}`}>
+                                    <img
+                                        src={item.fotoTrasera}
+                                        alt="Trasera"
+                                        className={`w-full h-full ${esMoneda ? 'object-contain p-3' : 'object-cover'}`}
+                                    />
+                                </div>
+                            ) : (
+                                <div className={`w-full h-full ${modoOscuro ? 'bg-slate-700' : 'bg-slate-200'} flex items-center justify-center`}>
+                                    <span className="text-slate-400 text-sm">Sin reverso</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Zoom Button (Separate from flip) */}
+                {/* Zoom Button */}
                 <button
-                    className="absolute bottom-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white z-20 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute bottom-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white z-30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
                     onClick={(e) => {
                         e.stopPropagation();
-                        setImagenZoom(isFlipped ? item.fotoTrasera : item.fotoFrontal);
+                        setImagenZoom(isFlipped && item.fotoTrasera ? item.fotoTrasera : item.fotoFrontal);
                     }}
                     title="Zoom"
                 >
