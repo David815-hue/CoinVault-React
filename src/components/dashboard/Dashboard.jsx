@@ -19,11 +19,11 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
         return conteo;
     };
 
-    const monedasPorPais = contarPorPais(monedas);
-    const billetesPorPais = contarPorPais(billetes);
+    const monedasPorPais = React.useMemo(() => contarPorPais(monedas), [monedas]);
+    const billetesPorPais = React.useMemo(() => contarPorPais(billetes), [billetes]);
     const totalPaisesMonedas = Object.keys(monedasPorPais).length;
     const totalPaisesBilletes = Object.keys(billetesPorPais).length;
-    const valores = calcularValorTotal();
+    const valores = React.useMemo(() => calcularValorTotal(), [calcularValorTotal]);
 
     return (
         <div className={`min-h-screen ${modoOscuro ? 'bg-slate-900' : 'bg-slate-50'} p-4 md:p-8 pb-40 transition-colors duration-300`}>
