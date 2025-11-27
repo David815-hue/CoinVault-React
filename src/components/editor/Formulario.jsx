@@ -122,14 +122,14 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
     };
 
     return (
-        <div className={`min-h-screen ${modoOscuro ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} p-4 md:p-6 pb-40`}>
+        <div className={`min-h-screen ${modoOscuro ? 'bg-[var(--bg-primary-dark)]' : 'bg-[var(--bg-primary-light)]'} p-4 md:p-6 pb-40`}>
             <div className="max-w-4xl mx-auto">
                 <button
                     onClick={() => {
                         setVista(esMoneda ? 'monedas' : 'billetes');
                         setItemEditando(null);
                     }}
-                    className="flex items-center gap-2 text-indigo-600 mb-4 hover:text-indigo-800 font-semibold"
+                    className="flex items-center gap-2 text-[var(--color-primary)] mb-4 hover:text-[var(--color-primary-hover)] font-semibold"
                 >
                     <ArrowLeft size={20} />
                     Volver
@@ -165,7 +165,7 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                     type="text"
                                     value={formData.denominacion}
                                     onChange={(e) => setFormData({ ...formData, denominacion: e.target.value })}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
                                         }`}
                                     placeholder="Ej: 100, 50, 20"
                                 />
@@ -247,7 +247,7 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                             </label>
                                             <button
                                                 onClick={() => handleReEditImage(formData.fotoFrontal, (img) => setFormData({ ...formData, fotoFrontal: img }), esMoneda)}
-                                                className="p-2 bg-indigo-600 rounded-full cursor-pointer hover:bg-indigo-700 text-white"
+                                                className="p-2 bg-[var(--color-primary)] rounded-full cursor-pointer hover:bg-[var(--color-primary-hover)] text-white"
                                             >
                                                 <Edit2 size={20} />
                                             </button>
@@ -316,7 +316,7 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                             </label>
                                             <button
                                                 onClick={() => handleReEditImage(formData.fotoTrasera, (img) => setFormData({ ...formData, fotoTrasera: img }), esMoneda)}
-                                                className="p-2 bg-indigo-600 rounded-full cursor-pointer hover:bg-indigo-700 text-white"
+                                                className="p-2 bg-[var(--color-primary)] rounded-full cursor-pointer hover:bg-[var(--color-primary-hover)] text-white"
                                             >
                                                 <Edit2 size={20} />
                                             </button>
@@ -335,7 +335,7 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                     type="text"
                                     value={formData.ano}
                                     onChange={(e) => setFormData({ ...formData, ano: e.target.value })}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
                                         }`}
                                     placeholder="Ej: 1995"
                                 />
@@ -361,7 +361,7 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                 <select
                                     value={formData.material}
                                     onChange={(e) => setFormData({ ...formData, material: e.target.value })}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
                                         }`}
                                 >
                                     <option value="">Seleccionar material</option>
@@ -399,7 +399,7 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                     step="0.01"
                                     value={formData.valorComprado}
                                     onChange={(e) => setFormData({ ...formData, valorComprado: e.target.value })}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
                                         }`}
                                     placeholder="0.00"
                                 />
@@ -414,7 +414,7 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                                     step="0.01"
                                     value={formData.valorVenta}
                                     onChange={(e) => setFormData({ ...formData, valorVenta: e.target.value })}
-                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
+                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent ${modoOscuro ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
                                         }`}
                                     placeholder="0.00"
                                 />
@@ -424,7 +424,7 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                         <div className="flex gap-3 pt-4">
                             <button
                                 onClick={handleSubmit}
-                                className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                                className="flex-1 bg-[var(--color-primary)] text-white py-3 rounded-lg font-semibold hover:bg-[var(--color-primary-hover)] transition-colors"
                             >
                                 {itemEditando ? 'Guardar Cambios' : 'Agregar ' + (esMoneda ? 'Moneda' : 'Billete')}
                             </button>

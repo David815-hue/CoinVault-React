@@ -2,84 +2,181 @@
 
 @import "tailwindcss";
 
+/* Base Variables & Defaults */
 :root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* Default Theme (Indigo) */
-  --color-primary: #6366f1;
-  /* Indigo 500 */
-  --color-primary-hover: #4f46e5;
-  /* Indigo 600 */
-  --color-primary-light: #e0e7ff;
-  /* Indigo 100 */
-  --color-primary-dark: #4338ca;
-  /* Indigo 700 */
-}
-
-:root[data-theme="emerald"] {
-  --color-primary: #10b981;
-  /* Emerald 500 */
-  --color-primary-hover: #059669;
-  /* Emerald 600 */
-  --color-primary-light: #d1fae5;
-  /* Emerald 100 */
-  --color-primary-dark: #047857;
-  /* Emerald 700 */
-}
-
-:root[data-theme="rose"] {
-  --color-primary: #f43f5e;
-  /* Rose 500 */
-  --color-primary-hover: #e11d48;
-  /* Rose 600 */
-  --color-primary-light: #ffe4e6;
-  /* Rose 100 */
-  --color-primary-dark: #be123c;
-  /* Rose 700 */
-}
-
-:root[data-theme="amber"] {
-  --color-primary: #f59e0b;
-  /* Amber 500 */
-  --color-primary-hover: #d97706;
-  /* Amber 600 */
-  --color-primary-light: #fef3c7;
-  /* Amber 100 */
-  --color-primary-dark: #b45309;
-  /* Amber 700 */
-}
-
-:root[data-theme="cyan"] {
-  --color-primary: #06b6d4;
-  /* Cyan 500 */
-  --color-primary-hover: #0891b2;
-  /* Cyan 600 */
-  --color-primary-light: #cffafe;
-  /* Cyan 100 */
-  --color-primary-dark: #0e7490;
-  /* Cyan 700 */
-}
-
-/* Base Colors */
-:root {
-  /* Light Theme Colors */
-  --bg-primary-light: #f8fafc;
-  /* Slate 50 */
-  --bg-secondary-light: #ffffff;
+  /* Default Text Colors (can be overridden by themes if needed) */
   --text-primary-light: #1e293b;
   /* Slate 800 */
   --text-secondary-light: #64748b;
   /* Slate 500 */
-
-  /* Dark Theme Colors */
-  --bg-primary-dark: #0f172a;
-  /* Slate 900 */
-  --bg-secondary-dark: #1e293b;
-  /* Slate 800 */
   --text-primary-dark: #f1f5f9;
   /* Slate 100 */
   --text-secondary-dark: #94a3b8;
   /* Slate 400 */
+}
+
+/* --- THEMES --- */
+
+/* Indigo (Default) */
+:root:not([data-theme]),
+:root[data-theme="indigo"] {
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-primary-light: #e0e7ff;
+  --color-primary-dark: #4338ca;
+
+  --bg-primary-light: #eef2ff;
+  /* Indigo 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #0f172a;
+  /* Slate 900 (Keeping slate for deep dark, or use #1e1b4b for tinted) */
+  --bg-secondary-dark: #1e293b;
+}
+
+/* Emerald */
+:root[data-theme="emerald"] {
+  --color-primary: #10b981;
+  --color-primary-hover: #059669;
+  --color-primary-light: #d1fae5;
+  --color-primary-dark: #047857;
+
+  --bg-primary-light: #ecfdf5;
+  /* Emerald 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #022c22;
+  /* Emerald 950 */
+  --bg-secondary-dark: #064e3b;
+  /* Emerald 900 */
+}
+
+/* Rose */
+:root[data-theme="rose"] {
+  --color-primary: #f43f5e;
+  --color-primary-hover: #e11d48;
+  --color-primary-light: #ffe4e6;
+  --color-primary-dark: #be123c;
+
+  --bg-primary-light: #fff1f2;
+  /* Rose 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #4c0519;
+  /* Rose 950 */
+  --bg-secondary-dark: #881337;
+  /* Rose 900 */
+}
+
+/* Amber */
+:root[data-theme="amber"] {
+  --color-primary: #f59e0b;
+  --color-primary-hover: #d97706;
+  --color-primary-light: #fef3c7;
+  --color-primary-dark: #b45309;
+
+  --bg-primary-light: #fffbeb;
+  /* Amber 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #451a03;
+  /* Amber 950 */
+  --bg-secondary-dark: #78350f;
+  /* Amber 900 */
+}
+
+/* Cyan */
+:root[data-theme="cyan"] {
+  --color-primary: #06b6d4;
+  --color-primary-hover: #0891b2;
+  --color-primary-light: #cffafe;
+  --color-primary-dark: #0e7490;
+
+  --bg-primary-light: #ecfeff;
+  /* Cyan 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #083344;
+  /* Cyan 950 */
+  --bg-secondary-dark: #164e63;
+  /* Cyan 900 */
+}
+
+/* Violet */
+:root[data-theme="violet"] {
+  --color-primary: #8b5cf6;
+  --color-primary-hover: #7c3aed;
+  --color-primary-light: #ede9fe;
+  --color-primary-dark: #5b21b6;
+
+  --bg-primary-light: #f5f3ff;
+  /* Violet 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #2e1065;
+  /* Violet 950 */
+  --bg-secondary-dark: #4c1d95;
+  /* Violet 900 */
+}
+
+/* Orange */
+:root[data-theme="orange"] {
+  --color-primary: #f97316;
+  --color-primary-hover: #ea580c;
+  --color-primary-light: #ffedd5;
+  --color-primary-dark: #c2410c;
+
+  --bg-primary-light: #fff7ed;
+  /* Orange 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #431407;
+  /* Orange 950 */
+  --bg-secondary-dark: #7c2d12;
+  /* Orange 900 */
+}
+
+/* Lime */
+:root[data-theme="lime"] {
+  --color-primary: #84cc16;
+  --color-primary-hover: #65a30d;
+  --color-primary-light: #ecfccb;
+  --color-primary-dark: #4d7c0f;
+
+  --bg-primary-light: #f7fee7;
+  /* Lime 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #1a2e05;
+  /* Lime 950 */
+  --bg-secondary-dark: #365314;
+  /* Lime 900 */
+}
+
+/* Fuchsia */
+:root[data-theme="fuchsia"] {
+  --color-primary: #d946ef;
+  --color-primary-hover: #c026d3;
+  --color-primary-light: #fae8ff;
+  --color-primary-dark: #a21caf;
+
+  --bg-primary-light: #fdf4ff;
+  /* Fuchsia 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #4a044e;
+  /* Fuchsia 950 */
+  --bg-secondary-dark: #701a75;
+  /* Fuchsia 900 */
+}
+
+/* Sky */
+:root[data-theme="sky"] {
+  --color-primary: #0ea5e9;
+  --color-primary-hover: #0284c7;
+  --color-primary-light: #e0f2fe;
+  --color-primary-dark: #0369a1;
+
+  --bg-primary-light: #f0f9ff;
+  /* Sky 50 */
+  --bg-secondary-light: #ffffff;
+  --bg-primary-dark: #0c4a6e;
+  /* Sky 950 */
+  --bg-secondary-dark: #075985;
+  /* Sky 900 */
 }
 
 body {

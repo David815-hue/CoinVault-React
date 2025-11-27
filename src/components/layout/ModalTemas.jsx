@@ -30,6 +30,11 @@ const ModalTemas = ({ onClose }) => {
         { id: 'rose', name: 'Rosa', color: '#f43f5e' },
         { id: 'amber', name: 'Ámbar', color: '#f59e0b' },
         { id: 'cyan', name: 'Cian', color: '#06b6d4' },
+        { id: 'violet', name: 'Violeta', color: '#8b5cf6' },
+        { id: 'orange', name: 'Naranja', color: '#f97316' },
+        { id: 'lime', name: 'Lima', color: '#84cc16' },
+        { id: 'fuchsia', name: 'Fucsia', color: '#d946ef' },
+        { id: 'sky', name: 'Cielo', color: '#0ea5e9' },
     ];
 
     return (

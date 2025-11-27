@@ -238,11 +238,11 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
     }
 
     return (
-        <div className={`min-h-screen ${modoOscuro ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} p-4 md:p-6 pb-40`}>
+        <div className={`min-h-screen ${modoOscuro ? 'bg-[var(--bg-primary-dark)]' : 'bg-[var(--bg-primary-light)]'} p-4 md:p-6 pb-40`}>
             <div className="max-w-7xl mx-auto">
                 <button
                     onClick={() => setVista('dashboard')}
-                    className="flex items-center gap-2 text-indigo-600 mb-4 hover:text-indigo-800 font-semibold"
+                    className="flex items-center gap-2 text-[var(--color-primary)] mb-4 hover:text-[var(--color-primary-hover)] font-semibold"
                 >
                     <ArrowLeft size={20} />
                     Volver al Dashboard
@@ -339,7 +339,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                     setTipoFormulario(tipo);
                                     setVista('formulario');
                                 }}
-                                className="bg-indigo-600 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                                className="bg-[var(--color-primary)] text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-[var(--color-primary-hover)] transition-colors flex items-center gap-2"
                             >
                                 <Plus size={20} />
                                 <span className="hidden sm:inline">Agregar</span>
@@ -446,7 +446,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                             value={busqueda}
                             onChange={(e) => setBusqueda(e.target.value)}
                             placeholder="Buscar por nombre, país, año, descripción..."
-                            className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg ${modoOscuro
+                            className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent text-lg ${modoOscuro
                                 ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                                 : 'border-gray-200'
                                 }`}

@@ -41,9 +41,9 @@ const MainContent = () => {
 
   if (cargando) {
     return (
-      <div className={`min-h-screen ${modoOscuro ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 to-indigo-50'} flex items-center justify-center`}>
+      <div className={`min-h-screen ${modoOscuro ? 'bg-[var(--bg-primary-dark)]' : 'bg-[var(--bg-primary-light)]'} flex items-center justify-center`}>
         <div className="text-center">
-          <Coins size={48} className="mx-auto text-amber-500 animate-pulse mb-4" />
+          <Coins size={48} className="mx-auto text-[var(--color-primary)] animate-pulse mb-4" />
           <p className={`text-xl ${modoOscuro ? 'text-gray-300' : 'text-gray-600'}`}>Cargando colección...</p>
         </div>
       </div>

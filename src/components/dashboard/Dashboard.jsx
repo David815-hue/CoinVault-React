@@ -26,7 +26,7 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
     const valores = React.useMemo(() => calcularValorTotal(), [calcularValorTotal]);
 
     return (
-        <div className={`min-h-screen ${modoOscuro ? 'bg-slate-900' : 'bg-slate-50'} p-4 md:p-8 pb-40 transition-colors duration-300`}>
+        <div className={`min-h-screen ${modoOscuro ? 'bg-[var(--bg-primary-dark)]' : 'bg-[var(--bg-primary-light)]'} p-4 md:p-8 pb-40 transition-colors duration-300`}>
             <div className="max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {/* Monedas Card */}
