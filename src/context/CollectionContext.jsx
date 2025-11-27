@@ -160,16 +160,51 @@ export const CollectionProvider = ({ children }) => {
                 version: '1.0'
             };
 
-            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `coinvault-backup-${new Date().toISOString().slice(0, 10)}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            return true;
+            const jsonString = JSON.stringify(backupData, null, 2);
+
+            if (Capacitor.isNativePlatform()) {
+                const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem');
+                const { Share } = await import('@capacitor/share');
+
+                // 1. Pedir nombre del archivo
+                let fileName = window.prompt("Nombre del archivo de backup:", `coinvault-backup-${new Date().toISOString().slice(0, 10)}`);
+
+                if (!fileName) return false; // Usuario canceló
+
+                if (!fileName.endsWith('.json')) {
+                    fileName += '.json';
+                }
+
+                // 2. Escribir archivo en Cache (temporalmente)
+                const result = await Filesystem.writeFile({
+                    path: fileName,
+                    data: jsonString,
+                    directory: Directory.Cache,
+                    encoding: Encoding.UTF8
+                });
+
+                // 3. Compartir el archivo para que el usuario elija dónde guardarlo
+                await Share.share({
+                    title: 'Guardar Backup',
+                    text: 'Guarda tu copia de seguridad de CoinVault',
+                    url: result.uri,
+                    dialogTitle: 'Guardar Backup en...'
+                });
+
+                return true;
+            } else {
+                // Web implementation
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `coinvault-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                return true;
+            }
         } catch (error) {
             console.error('Error al exportar backup:', error);
             return false;
