@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-const API_KEY = "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"; // Key provided by user
+const API_KEY = "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"; // Key provided by user
 
 const client = new OpenAI({
     apiKey: API_KEY,

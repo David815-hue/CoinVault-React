@@ -13,6 +13,11 @@ const ModalZoom = ({ imagen, onClose }) => {
     const [tilt, setTilt] = useState({ x: 0, y: 0 });
     const [mostrarTrasera, setMostrarTrasera] = useState(false);
 
+    // Touch gesture states
+    const [initialPinchDistance, setInitialPinchDistance] = useState(null);
+    const [initialScale, setInitialScale] = useState(1);
+    const [lastTap, setLastTap] = useState(0);
+
     const imageRef = useRef(null);
     const containerRef = useRef(null);
 
@@ -91,27 +96,107 @@ const ModalZoom = ({ imagen, onClose }) => {
         setIsDragging(false);
     };
 
+    // Helper function to calculate distance between two touch points
+    const getTouchDistance = (touch1, touch2) => {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    // Helper function to get center point between two touches
+    const getTouchCenter = (touch1, touch2) => {
+        return {
+            x: (touch1.clientX + touch2.clientX) / 2,
+            y: (touch1.clientY + touch2.clientY) / 2
+        };
+    };
+
     const handleTouchStart = (e) => {
-        if (e.touches.length === 1 && scale > 1 && !is3DMode) {
+        // Double tap to zoom (only in normal mode)
+        if (!is3DMode) {
+            const now = Date.now();
+            const DOUBLE_TAP_DELAY = 300;
+            if (now - lastTap < DOUBLE_TAP_DELAY && e.touches.length === 1) {
+                e.preventDefault();
+                if (scale > 1) {
+                    handleReset();
+                } else {
+                    setScale(2);
+                }
+                setLastTap(0);
+                return;
+            }
+            setLastTap(now);
+        }
+
+        if (is3DMode && e.touches.length === 1) {
+            // 3D mode: touch to rotate (will handle in move)
+            e.preventDefault();
+        } else if (e.touches.length === 2 && !is3DMode) {
+            // Pinch to zoom (only in normal mode)
+            e.preventDefault();
+            const distance = getTouchDistance(e.touches[0], e.touches[1]);
+            setInitialPinchDistance(distance);
+            setInitialScale(scale);
+            setIsDragging(false);
+        } else if (e.touches.length === 1 && !is3DMode) {
+            // Single finger drag (works at any zoom level in normal mode)
+            const touch = e.touches[0];
             setIsDragging(true);
             setDragStart({
-                x: e.touches[0].clientX - position.x,
-                y: e.touches[0].clientY - position.y
+                x: touch.clientX - position.x,
+                y: touch.clientY - position.y
             });
         }
     };
 
     const handleTouchMove = (e) => {
-        if (isDragging && e.touches.length === 1 && scale > 1 && !is3DMode) {
+        if (is3DMode && e.touches.length === 1 && containerRef.current) {
+            // 3D mode rotation with touch
+            e.preventDefault();
+            const rect = containerRef.current.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            // Calculate tilt based on touch position relative to center
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateY = ((x - centerX) / centerX) * 180;
+            const rotateX = -((y - centerY) / centerY) * 20;
+
+            setTilt({ x: rotateX, y: rotateY });
+
+            // Show back image when rotated past 90 degrees (if available)
+            if (imagenTrasera) {
+                setMostrarTrasera(Math.abs(rotateY) > 90);
+            }
+        } else if (e.touches.length === 2 && initialPinchDistance && !is3DMode) {
+            // Pinch zoom (normal mode)
+            e.preventDefault();
+            const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
+            const scaleChange = currentDistance / initialPinchDistance;
+            const newScale = Math.max(0.5, Math.min(5, initialScale * scaleChange));
+            setScale(newScale);
+        } else if (e.touches.length === 1 && isDragging && !is3DMode) {
+            // Pan/drag with single finger (normal mode)
+            e.preventDefault();
+            const touch = e.touches[0];
             setPosition({
-                x: e.touches[0].clientX - dragStart.x,
-                y: e.touches[0].clientY - dragStart.y
+                x: touch.clientX - dragStart.x,
+                y: touch.clientY - dragStart.y
             });
         }
     };
 
-    const handleTouchEnd = () => {
-        setIsDragging(false);
+    const handleTouchEnd = (e) => {
+        if (e.touches.length < 2) {
+            setInitialPinchDistance(null);
+        }
+        if (e.touches.length === 0) {
+            setIsDragging(false);
+        }
     };
 
     const handleWheel = (e) => {
@@ -232,7 +317,8 @@ const ModalZoom = ({ imagen, onClose }) => {
 
             {is3DMode && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full bg-indigo-600/80 text-white text-sm font-medium animate-pulse">
-                    Mueve el mouse para rotar en 3D
+                    <span className="hidden md:inline">Mueve el mouse para rotar en 3D</span>
+                    <span className="md:hidden">Mueve el dedo para rotar en 3D</span>
                 </div>
             )}
 
@@ -275,11 +361,13 @@ const ModalZoom = ({ imagen, onClose }) => {
                     <div>Mueve el cursor para efecto 3D</div>
                 ) : (
                     <>
-                        <div>Rueda del mouse: Zoom</div>
-                        <div>Arrastrar: Mover imagen</div>
+                        <div className="hidden md:block">Rueda del mouse: Zoom</div>
+                        <div className="hidden md:block">Arrastrar: Mover imagen</div>
+                        <div className="md:hidden">Pellizcar: Zoom</div>
+                        <div className="md:hidden">Doble toque: Zoom rápido</div>
+                        <div className="md:hidden">Deslizar: Mover imagen</div>
                     </>
                 )}
-                <div>Doble clic: Reiniciar</div>
             </div>
         </div>
     );
