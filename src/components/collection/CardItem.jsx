@@ -84,14 +84,17 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
 
                 {/* Zoom Button */}
                 <button
-                    className="absolute bottom-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 rounded-full text-white z-30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
+                    className="absolute bottom-2 right-2 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white z-30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
                     onClick={(e) => {
                         e.stopPropagation();
-                        setImagenZoom(isFlipped && item.fotoTrasera ? item.fotoTrasera : item.fotoFrontal);
+                        setImagenZoom({
+                            frontal: item.fotoFrontal,
+                            trasera: item.fotoTrasera
+                        });
                     }}
                     title="Zoom"
                 >
-                    <ZoomIn size={16} />
+                    <ZoomIn size={20} />
                 </button>
             </div>
 

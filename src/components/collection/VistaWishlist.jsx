@@ -43,14 +43,18 @@ const VistaWishlist = ({ setVista }) => {
                     encoding: isBase64 ? undefined : Encoding.UTF8
                 });
 
-                await Share.share({
-                    title: 'Compartir Lista de Deseos',
-                    text: 'Aquí está mi lista de deseos de CoinVault',
-                    url: savedFile.uri,
-                    dialogTitle: 'Compartir archivo'
-                });
+                try {
+                    await Share.share({
+                        title: 'Compartir Lista de Deseos',
+                        text: 'Aquí está mi lista de deseos de CoinVault',
+                        url: savedFile.uri,
+                        dialogTitle: 'Compartir archivo'
+                    });
+                } catch (shareError) {
+                    console.log('User cancelled share or share failed', shareError);
+                }
             } catch (error) {
-                console.error('Error saving/sharing file:', error);
+                console.error('Error saving file:', error);
                 alert('Error al guardar el archivo. Verifica los permisos.');
             }
         } else {

@@ -7,6 +7,7 @@ import { useCollection } from '../../context/CollectionContext';
 import { PAISES, materialesMoneda, estadosConservacion } from '../../utils/constants';
 import ImageEditor from './ImageEditor';
 import CountrySelect from '../common/CountrySelect';
+import { compressImage } from '../../utils/imageUtils';
 
 const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando }) => {
     const { modoOscuro } = useTheme();
@@ -41,7 +42,8 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
             });
 
             if (image.dataUrl) {
-                setImagenEditando(image.dataUrl);
+                const compressed = await compressImage(image.dataUrl);
+                setImagenEditando(compressed);
                 setTipoImagenEditando({ callback: setCallback, esMoneda });
             }
         } catch (error) {
@@ -60,7 +62,8 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
             });
 
             if (image.dataUrl) {
-                setImagenEditando(image.dataUrl);
+                const compressed = await compressImage(image.dataUrl);
+                setImagenEditando(compressed);
                 setTipoImagenEditando({ callback: setCallback, esMoneda });
             }
         } catch (error) {
@@ -72,14 +75,22 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
         // En web, usar file input tradicional
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 2000000) {
-                alert('La imagen es muy grande. Usa una menor a 2MB.');
+            if (file.size > 5000000) { // Increased limit to 5MB since we compress
+                alert('La imagen es muy grande. Usa una menor a 5MB.');
                 return;
             }
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagenEditando(reader.result);
-                setTipoImagenEditando({ callback: setCallback, esMoneda });
+            reader.onloadend = async () => {
+                try {
+                    const compressed = await compressImage(reader.result);
+                    setImagenEditando(compressed);
+                    setTipoImagenEditando({ callback: setCallback, esMoneda });
+                } catch (error) {
+                    console.error('Error compressing image:', error);
+                    // Fallback to original if compression fails
+                    setImagenEditando(reader.result);
+                    setTipoImagenEditando({ callback: setCallback, esMoneda });
+                }
             };
             reader.readAsDataURL(file);
         }

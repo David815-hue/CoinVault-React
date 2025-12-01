@@ -13,6 +13,7 @@ import autoTable from 'jspdf-autotable';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import ModalZoom from './ModalZoom';
 
 const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, iniciarSlideshow }) => {
     const { modoOscuro } = useTheme();
@@ -32,6 +33,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
     const [vistaDisplay, setVistaDisplay] = useState('cuadricula');
     const [slideshowActivo, setSlideshowActivo] = useState(false);
     const [mostrarMenuExportar, setMostrarMenuExportar] = useState(false);
+    const [imagenZoom, setImagenZoom] = useState(null);
 
     const aplicarFiltros = (items) => {
         return items.filter(item => {
@@ -81,14 +83,18 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                     encoding: isBase64 ? undefined : Encoding.UTF8
                 });
 
-                await Share.share({
-                    title: `Compartir Reporte de ${esMoneda ? 'Monedas' : 'Billetes'}`,
-                    text: `Aquí está mi reporte de ${esMoneda ? 'monedas' : 'billetes'} de CoinVault`,
-                    url: savedFile.uri,
-                    dialogTitle: 'Compartir archivo'
-                });
+                try {
+                    await Share.share({
+                        title: `Compartir Reporte de ${esMoneda ? 'Monedas' : 'Billetes'}`,
+                        text: `Aquí está mi reporte de ${esMoneda ? 'monedas' : 'billetes'} de CoinVault`,
+                        url: savedFile.uri,
+                        dialogTitle: 'Compartir archivo'
+                    });
+                } catch (shareError) {
+                    console.log('User cancelled share or share failed', shareError);
+                }
             } catch (error) {
-                console.error('Error saving/sharing file:', error);
+                console.error('Error saving file:', error);
                 alert('Error al guardar el archivo. Verifica los permisos.');
             }
         } else {
@@ -488,6 +494,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                         tipo={tipo}
                                         setVista={setVista}
                                         setItemEditando={setItemEditando}
+                                        setImagenZoom={setImagenZoom}
                                     />
                                 ))}
                             </div>
@@ -500,6 +507,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                         tipo={tipo}
                                         setVista={setVista}
                                         setItemEditando={setItemEditando}
+                                        setImagenZoom={setImagenZoom}
                                     />
                                 ))}
                             </div>
@@ -508,6 +516,12 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                 )}
             </div>
 
+            {imagenZoom && (
+                <ModalZoom
+                    imagen={imagenZoom}
+                    onClose={() => setImagenZoom(null)}
+                />
+            )}
         </div>
     );
 };

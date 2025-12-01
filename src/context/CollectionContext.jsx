@@ -271,7 +271,7 @@ export const CollectionProvider = ({ children }) => {
         }
     };
 
-    const value = {
+    const value = React.useMemo(() => ({
         monedas,
         billetes,
         wishlist,
@@ -290,7 +290,7 @@ export const CollectionProvider = ({ children }) => {
         crearNuevoAlbum,
         eliminarAlbumExistente,
         obtenerItemsAlbum
-    };
+    }), [monedas, billetes, wishlist, albums, cargando]);
 
     return (
         <CollectionContext.Provider value={value}>
