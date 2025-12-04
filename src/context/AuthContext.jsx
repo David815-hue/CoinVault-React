@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { auth, onAuthStateChanged, loginWithEmail, logoutUser } from '../services/firebase';
+import { auth, onAuthStateChanged, loginWithEmail, logoutUser, isAdminUser } from '../services/firebase';
 
 const AuthContext = createContext();
 
@@ -43,7 +43,8 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
-        isAuthenticated: !!user
+        isAuthenticated: !!user,
+        isAdmin: user ? isAdminUser(user.email) : false
     };
 
     return (
@@ -54,3 +55,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export default AuthContext;
+

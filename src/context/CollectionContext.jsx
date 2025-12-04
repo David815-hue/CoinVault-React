@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import localforage from 'localforage';
 import { initDB, getItems, addItem, updateItem, deleteItem, toggleFavoritoDB, getAlbums, createAlbum, deleteAlbum, getAlbumItems } from '../services/platformDB';
+import { syncUserStats } from '../services/firebase';
+import { useAuth } from './AuthContext';
 
 const CollectionContext = createContext();
 
@@ -13,6 +15,7 @@ export const useCollection = () => {
 };
 
 export const CollectionProvider = ({ children }) => {
+    const { user } = useAuth();
     const [monedas, setMonedas] = useState([]);
     const [billetes, setBilletes] = useState([]);
     const [wishlist, setWishlist] = useState([]);
@@ -74,6 +77,20 @@ export const CollectionProvider = ({ children }) => {
         };
         init();
     }, []);
+
+    // Sync stats to Firestore (once per day)
+    useEffect(() => {
+        const syncStats = async () => {
+            if (!cargando && user) {
+                await syncUserStats(user.uid, user.email, {
+                    monedas: monedas.length,
+                    billetes: billetes.length,
+                    albums: albums.length
+                });
+            }
+        };
+        syncStats();
+    }, [cargando, user, monedas.length, billetes.length, albums.length]);
 
     const agregarItem = async (item, tipo) => {
         try {

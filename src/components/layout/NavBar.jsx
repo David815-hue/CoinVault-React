@@ -1,9 +1,11 @@
 import React from 'react';
-import { Home, Coins, Banknote, List, Palette } from 'lucide-react';
+import { Home, Coins, Banknote, List, Palette, Shield } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
+import { useAuth } from '../../context/AuthContext';
 
 const NavBar = ({ vista, setVista, setMostrarTemas }) => {
     const { modoOscuro } = useTheme();
+    const { isAdmin } = useAuth();
 
     const navItems = [
         { id: 'dashboard', icon: Home, label: 'Inicio' },
@@ -58,6 +60,22 @@ const NavBar = ({ vista, setVista, setMostrarTemas }) => {
                         <Palette size={24} className="mb-1 transition-transform group-hover:rotate-12" />
                         <span className="text-xs font-medium">Temas</span>
                     </button>
+
+                    {/* Admin button - only visible for admin */}
+                    {isAdmin && (
+                        <button
+                            onClick={() => setVista('admin')}
+                            className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 group ${vista === 'admin'
+                                ? 'text-amber-500 transform -translate-y-1'
+                                : modoOscuro
+                                    ? 'text-amber-400/70 hover:text-amber-400'
+                                    : 'text-amber-600/70 hover:text-amber-600'
+                                }`}
+                        >
+                            <Shield size={24} className={`mb-1 transition-transform group-hover:scale-110 ${vista === 'admin' ? 'fill-current' : ''}`} />
+                            <span className="text-xs font-medium">Admin</span>
+                        </button>
+                    )}
                 </div>
             </div>
         </nav>
@@ -65,5 +83,6 @@ const NavBar = ({ vista, setVista, setMostrarTemas }) => {
 };
 
 export default NavBar;
+
 
 

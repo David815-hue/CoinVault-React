@@ -1,6 +1,7 @@
 // Firebase configuration for CoinVault
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, setDoc, getDocs, collection } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDsx7edlelOeee1Fbo0T06gmK9lLEDqCfE",
@@ -14,6 +15,15 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Admin email (hardcoded)
+const ADMIN_EMAIL = 'davidochoa81550@gmail.com';
+
+// Check if user is admin
+export const isAdminUser = (email) => {
+    return email === ADMIN_EMAIL;
+};
 
 // Auth functions
 export const loginWithEmail = async (email, password) => {
@@ -46,4 +56,66 @@ export const logoutUser = async () => {
     }
 };
 
-export { auth, onAuthStateChanged };
+// Firestore: Sync user stats (once per day)
+export const syncUserStats = async (uid, email, stats) => {
+    try {
+        const today = new Date().toDateString();
+        const lastSync = localStorage.getItem('lastStatsSync');
+
+        // Only sync if it's a new day
+        if (lastSync === today) {
+            return { success: true, skipped: true };
+        }
+
+        await setDoc(doc(db, 'users', uid), {
+            email,
+            monedas: stats.monedas || 0,
+            billetes: stats.billetes || 0,
+            albums: stats.albums || 0,
+            lastSync: new Date().toISOString()
+        });
+
+        localStorage.setItem('lastStatsSync', today);
+        return { success: true };
+    } catch (error) {
+        console.error('Error syncing stats:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+// Firestore: Force sync stats (on logout or manual trigger)
+export const forceSyncUserStats = async (uid, email, stats) => {
+    try {
+        await setDoc(doc(db, 'users', uid), {
+            email,
+            monedas: stats.monedas || 0,
+            billetes: stats.billetes || 0,
+            albums: stats.albums || 0,
+            lastSync: new Date().toISOString()
+        });
+
+        localStorage.setItem('lastStatsSync', new Date().toDateString());
+        return { success: true };
+    } catch (error) {
+        console.error('Error syncing stats:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+// Firestore: Get all users stats (admin only)
+export const getAllUsersStats = async () => {
+    try {
+        const querySnapshot = await getDocs(collection(db, 'users'));
+        const users = [];
+        querySnapshot.forEach((doc) => {
+            users.push({ id: doc.id, ...doc.data() });
+        });
+        return { success: true, users };
+    } catch (error) {
+        console.error('Error getting users:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+export { auth, db, onAuthStateChanged };
+

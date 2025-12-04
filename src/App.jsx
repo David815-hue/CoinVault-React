@@ -14,12 +14,14 @@ import ModalTemas from './components/layout/ModalTemas';
 import Slideshow from './components/collection/Slideshow';
 import VistaAlbumes from './components/albums/VistaAlbumes';
 import LoginScreen from './components/auth/LoginScreen';
+import AdminPanel from './components/admin/AdminPanel';
 import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 
 const MainContent = () => {
-  const { modoOscuro, toggleModoOscuro } = useTheme();
-  const { monedas, billetes, cargando, guardarMonedas, guardarBilletes } = useCollection();
+  const { modoOscuro } = useTheme();
+  const { monedas, billetes, cargando } = useCollection();
+  const { isAdmin } = useAuth();
 
   const [vista, setVista] = useState('dashboard');
   const [tipoFormulario, setTipoFormulario] = useState('monedas');
@@ -60,7 +62,6 @@ const MainContent = () => {
         setMostrarTemas={setMostrarTemas}
       />
 
-
       {vista === 'dashboard' && (
         <Dashboard
           setVista={setVista}
@@ -94,6 +95,10 @@ const MainContent = () => {
         <VistaAlbumes />
       )}
 
+      {vista === 'admin' && isAdmin && (
+        <AdminPanel onBack={() => setVista('dashboard')} />
+      )}
+
       {vista === 'wishlist' && (
         <VistaWishlist
           setVista={setVista}
@@ -125,8 +130,6 @@ const MainContent = () => {
           setImagenZoom={setImagenZoom}
         />
       )}
-
-
 
       {mostrarTemas && (
         <ModalTemas
