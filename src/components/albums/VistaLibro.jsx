@@ -40,6 +40,7 @@ const VistaLibro = ({ album, onBack }) => {
     const { obtenerItemsAlbum } = useCollection();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isSinglePage, setIsSinglePage] = useState(false);
     const bookRef = useRef();
 
     useEffect(() => {
@@ -100,21 +101,35 @@ const VistaLibro = ({ album, onBack }) => {
 
     return (
         <div className={`album-viewer min-h-screen flex flex-col items-center justify-center p-8 ${modoOscuro ? 'bg-gray-900' : 'bg-gray-100'}`}>
-            <button
-                onClick={onBack}
-                className="absolute top-8 left-8 flex items-center gap-2 text-[var(--color-primary)] font-bold hover:text-[var(--color-primary-hover)] z-10"
-            >
-                <ArrowLeft size={24} /> Volver a Álbumes
-            </button>
+            <div className="absolute top-8 left-8 flex gap-4 z-10">
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 text-[var(--color-primary)] font-bold hover:text-[var(--color-primary-hover)]"
+                >
+                    <ArrowLeft size={24} /> Volver a Álbumes
+                </button>
+            </div>
+
+            <div className="absolute top-8 right-8 z-10">
+                <button
+                    onClick={() => setIsSinglePage(!isSinglePage)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${modoOscuro ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-800 hover:bg-gray-50'} shadow-md`}
+                >
+                    <BookOpen size={20} />
+                    {isSinglePage ? 'Vista Doble' : 'Vista Simple'}
+                </button>
+            </div>
 
             <div className="relative shadow-2xl rounded-r-xl">
                 <HTMLFlipBook
+                    key={isSinglePage ? 'single' : 'double'}
                     width={400}
                     height={600}
                     showCover={true}
                     maxShadowOpacity={0.5}
                     className={`${modoOscuro ? 'bg-gray-800' : 'bg-white'}`}
                     ref={bookRef}
+                    usePortrait={isSinglePage}
                 >
                     {/* Cover */}
                     <div className={`cover ${coverColorClass} text-white p-10 flex flex-col items-center justify-center text-center h-full border-r-4 relative overflow-hidden`}>
