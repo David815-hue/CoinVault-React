@@ -1,6 +1,6 @@
 // Firebase configuration for CoinVault
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDocs, collection } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -53,6 +53,22 @@ export const logoutUser = async () => {
         return { success: true };
     } catch (error) {
         return { success: false, error: 'Error al cerrar sesión' };
+    }
+};
+
+// Password reset
+export const resetPassword = async (email) => {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        return { success: true };
+    } catch (error) {
+        let message = 'Error al enviar el correo';
+        if (error.code === 'auth/user-not-found') {
+            message = 'No existe una cuenta con este correo';
+        } else if (error.code === 'auth/invalid-email') {
+            message = 'Correo inválido';
+        }
+        return { success: false, error: message };
     }
 };
 
