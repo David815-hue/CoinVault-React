@@ -65,3 +65,5 @@ const NavBar = ({ vista, setVista, setMostrarTemas }) => {
 };
 
 export default NavBar;
+
+

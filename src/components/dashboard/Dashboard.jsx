@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
-import { Coins, Banknote, Globe, Heart, DollarSign, BarChart3, Star, X, Book } from 'lucide-react';
+import { Coins, Banknote, Globe, Heart, DollarSign, BarChart3, Star, X, Book, LogOut } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
+import { useAuth } from '../../context/AuthContext';
 import MapaMundial from './MapaMundial';
 
 const Dashboard = ({ setVista, setMostrarFavoritos }) => {
     const { modoOscuro } = useTheme();
     const { monedas, billetes, albums, calcularValorTotal } = useCollection();
+    const { logout } = useAuth();
     const [paisSeleccionado, setPaisSeleccionado] = useState(null);
+
+    const handleLogout = async () => {
+        if (confirm('¿Seguro que deseas cerrar sesión?')) {
+            await logout();
+        }
+    };
 
     const contarPorPais = (items) => {
         const conteo = {};
@@ -185,6 +193,20 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
                     />
                 </div>
 
+                {/* Logout Button at the end */}
+                <div className="mt-12 flex justify-center">
+                    <button
+                        onClick={handleLogout}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${modoOscuro
+                            ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20'
+                            : 'bg-red-50 text-red-500 hover:bg-red-100 border border-red-200'
+                            }`}
+                    >
+                        <LogOut size={20} />
+                        Cerrar Sesión
+                    </button>
+                </div>
+
                 {paisSeleccionado && (
                     <div
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
@@ -262,3 +284,4 @@ const Dashboard = ({ setVista, setMostrarFavoritos }) => {
 };
 
 export default Dashboard;
+

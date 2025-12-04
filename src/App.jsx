@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Coins } from 'lucide-react';
+import { Coins, Loader2 } from 'lucide-react';
 import { CollectionProvider, useCollection } from './context/CollectionContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { useTheme } from './hooks/useTheme';
 import NavBar from './components/layout/NavBar';
 import Dashboard from './components/dashboard/Dashboard';
@@ -12,6 +13,7 @@ import VistaWishlist from './components/collection/VistaWishlist';
 import ModalTemas from './components/layout/ModalTemas';
 import Slideshow from './components/collection/Slideshow';
 import VistaAlbumes from './components/albums/VistaAlbumes';
+import LoginScreen from './components/auth/LoginScreen';
 import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 
@@ -142,11 +144,40 @@ const MainContent = () => {
   );
 };
 
-const App = () => {
+// Protected App content - only shown when authenticated
+const ProtectedApp = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={48} className="mx-auto text-amber-500 animate-spin mb-4" />
+          <p className="text-white text-lg">Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
+  // Show main app if authenticated
   return (
     <CollectionProvider>
       <MainContent />
     </CollectionProvider>
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <ProtectedApp />
+    </AuthProvider>
   );
 };
 
