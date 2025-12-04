@@ -4,12 +4,12 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendP
 import { getFirestore, doc, setDoc, getDocs, collection } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDsx7edlelOeee1Fbo0T06gmK9lLEDqCfE",
-    authDomain: "coinvault-92b48.firebaseapp.com",
-    projectId: "coinvault-92b48",
-    storageBucket: "coinvault-92b48.firebasestorage.app",
-    messagingSenderId: "474851130312",
-    appId: "1:474851130312:web:37d1661a7be8e9ff801efd"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-const API_KEY = "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"; // Key provided by user
+const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 const client = new OpenAI({
     apiKey: API_KEY,
