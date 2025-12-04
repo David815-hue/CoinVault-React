@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Camera, Edit2, Heart, Trash2, ZoomIn, Sparkles, RotateCw } from 'lucide-react';
+import { Camera, Edit2, Heart, Trash2, ZoomIn, Sparkles, RotateCw, Check } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 import ModalAIInfo from './ModalAIInfo';
 
-const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
+const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom, compareMode = false, isSelected = false, onToggleSelect }) => {
     const { modoOscuro } = useTheme();
     const { toggleFavorito, eliminarItem } = useCollection();
     const [showAI, setShowAI] = useState(false);
@@ -24,13 +24,31 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom }) => {
 
     const toggleFlip = (e) => {
         e.stopPropagation();
-        setIsFlipped(!isFlipped);
+        if (!compareMode) {
+            setIsFlipped(!isFlipped);
+        }
+    };
+
+    const handleCardClick = () => {
+        if (compareMode && onToggleSelect) {
+            onToggleSelect(item.id);
+        }
     };
 
     return (
-        <div className={`relative group rounded-2xl overflow-hidden transition-all duration-300 card-hover ${modoOscuro ? 'bg-slate-800 shadow-xl shadow-slate-900/50' : 'bg-white/90 backdrop-blur-sm shadow-lg shadow-slate-200/50'}`}>
+        <div
+            className={`relative group rounded-2xl overflow-hidden transition-all duration-300 card-hover ${modoOscuro ? 'bg-slate-800 shadow-xl shadow-slate-900/50' : 'bg-white/90 backdrop-blur-sm shadow-lg shadow-slate-200/50'} ${compareMode ? 'cursor-pointer' : ''} ${isSelected ? 'ring-4 ring-indigo-500' : ''}`}
+            onClick={handleCardClick}
+        >
+            {/* Selection Checkbox */}
+            {compareMode && (
+                <div className={`absolute top-3 left-3 z-20 w-7 h-7 rounded-full flex items-center justify-center transition-all ${isSelected ? 'bg-indigo-500 text-white' : modoOscuro ? 'bg-slate-700 border-2 border-slate-500' : 'bg-white border-2 border-gray-300'}`}>
+                    {isSelected && <Check size={16} strokeWidth={3} />}
+                </div>
+            )}
+
             <button
-                onClick={() => toggleFavorito(item.id, tipo)}
+                onClick={(e) => { e.stopPropagation(); toggleFavorito(item.id, tipo); }}
                 className="absolute top-3 right-3 z-10 p-2 rounded-full shadow-lg hover:scale-110 transition-transform glass"
             >
                 <Heart

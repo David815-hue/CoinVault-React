@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Coins, Banknote, Filter, Grid, List, Play, Plus, Search, X, Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { ArrowLeft, Coins, Banknote, Filter, Grid, List, Play, Plus, Search, X, Download, FileSpreadsheet, FileText, GitCompare } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 import { estadosConservacion, PAISES } from '../../utils/constants';
@@ -14,6 +14,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import ModalZoom from './ModalZoom';
+import ModalComparador from './ModalComparador';
 
 const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, iniciarSlideshow }) => {
     const { modoOscuro } = useTheme();
@@ -34,6 +35,11 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
     const [slideshowActivo, setSlideshowActivo] = useState(false);
     const [mostrarMenuExportar, setMostrarMenuExportar] = useState(false);
     const [imagenZoom, setImagenZoom] = useState(null);
+
+    // Compare mode state
+    const [compareMode, setCompareMode] = useState(false);
+    const [selectedForCompare, setSelectedForCompare] = useState([]);
+    const [showComparador, setShowComparador] = useState(false);
 
     const aplicarFiltros = (items) => {
         return items.filter(item => {
@@ -329,6 +335,23 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                             </div>
 
                             <button
+                                onClick={() => {
+                                    setCompareMode(!compareMode);
+                                    if (compareMode) setSelectedForCompare([]);
+                                }}
+                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${compareMode
+                                    ? 'bg-indigo-600 text-white'
+                                    : modoOscuro
+                                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                title="Comparar items"
+                            >
+                                <GitCompare size={20} />
+                                <span className="hidden md:inline">{compareMode ? 'Cancelar' : 'Comparar'}</span>
+                            </button>
+
+                            <button
                                 onClick={() => setSlideshowActivo(true)}
                                 className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
                                     ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -495,6 +518,19 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                         setVista={setVista}
                                         setItemEditando={setItemEditando}
                                         setImagenZoom={setImagenZoom}
+                                        compareMode={compareMode}
+                                        isSelected={selectedForCompare.includes(item.id)}
+                                        onToggleSelect={(id) => {
+                                            setSelectedForCompare(prev => {
+                                                if (prev.includes(id)) {
+                                                    return prev.filter(i => i !== id);
+                                                }
+                                                if (prev.length >= 3) {
+                                                    return prev; // Max 3
+                                                }
+                                                return [...prev, id];
+                                            });
+                                        }}
                                     />
                                 ))}
                             </div>
@@ -516,10 +552,35 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                 )}
             </div>
 
+            {/* Floating Compare Button */}
+            {compareMode && selectedForCompare.length >= 2 && (
+                <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-40">
+                    <button
+                        onClick={() => setShowComparador(true)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-full font-bold shadow-xl flex items-center gap-3 transition-all hover:scale-105"
+                    >
+                        <GitCompare size={24} />
+                        Ver Comparación ({selectedForCompare.length})
+                    </button>
+                </div>
+            )}
+
             {imagenZoom && (
                 <ModalZoom
                     imagen={imagenZoom}
                     onClose={() => setImagenZoom(null)}
+                />
+            )}
+
+            {showComparador && (
+                <ModalComparador
+                    items={items.filter(i => selectedForCompare.includes(i.id))}
+                    tipo={tipo}
+                    onClose={() => {
+                        setShowComparador(false);
+                        setCompareMode(false);
+                        setSelectedForCompare([]);
+                    }}
                 />
             )}
         </div>
