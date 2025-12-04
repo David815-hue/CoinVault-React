@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ZoomIn, ZoomOut, RotateCw, Box, FlipHorizontal } from 'lucide-react';
+import { X, RotateCw } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 
 const ModalZoom = ({ imagen, onClose }) => {
@@ -9,7 +9,6 @@ const ModalZoom = ({ imagen, onClose }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [rotation, setRotation] = useState(0);
-    const [is3DMode, setIs3DMode] = useState(false);
     const [tilt, setTilt] = useState({ x: 0, y: 0 });
     const [mostrarTrasera, setMostrarTrasera] = useState(false);
 
@@ -28,14 +27,6 @@ const ModalZoom = ({ imagen, onClose }) => {
     const imagenTrasera = typeof imagen === 'string' ? null : imagen.trasera;
     const imagenActual = (mostrarTrasera && imagenTrasera) ? imagenTrasera : imagenFrontal;
 
-    const handleZoomIn = () => {
-        setScale(prev => Math.min(prev + 0.5, 5));
-    };
-
-    const handleZoomOut = () => {
-        setScale(prev => Math.max(prev - 0.5, 0.5));
-    };
-
     const handleRotate = () => {
         setRotation(prev => (prev + 90) % 360);
     };
@@ -48,30 +39,21 @@ const ModalZoom = ({ imagen, onClose }) => {
         setMostrarTrasera(false);
     };
 
-    const handleFlip = () => {
-        if (imagenTrasera) {
-            setMostrarTrasera(!mostrarTrasera);
-        }
-    };
-
     const handleMouseDown = (e) => {
-        if (scale > 1 && !is3DMode) {
-            setIsDragging(true);
-            setDragStart({
-                x: e.clientX - position.x,
-                y: e.clientY - position.y
-            });
-        }
+        setIsDragging(true);
+        setDragStart({
+            x: e.clientX - position.x,
+            y: e.clientY - position.y
+        });
     };
 
     const handleMouseMove = (e) => {
-        if (is3DMode && containerRef.current) {
+        if (containerRef.current) {
             const rect = containerRef.current.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
             // Calculate tilt based on mouse position relative to center
-            // Range: -180deg to 180deg for full rotation
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
@@ -84,7 +66,10 @@ const ModalZoom = ({ imagen, onClose }) => {
             if (imagenTrasera) {
                 setMostrarTrasera(Math.abs(rotateY) > 90);
             }
-        } else if (isDragging && scale > 1) {
+        }
+
+        // Handle dragging for pan
+        if (isDragging && scale > 1) {
             setPosition({
                 x: e.clientX - dragStart.x,
                 y: e.clientY - dragStart.y
@@ -103,44 +88,31 @@ const ModalZoom = ({ imagen, onClose }) => {
         return Math.sqrt(dx * dx + dy * dy);
     };
 
-    // Helper function to get center point between two touches
-    const getTouchCenter = (touch1, touch2) => {
-        return {
-            x: (touch1.clientX + touch2.clientX) / 2,
-            y: (touch1.clientY + touch2.clientY) / 2
-        };
-    };
-
     const handleTouchStart = (e) => {
-        // Double tap to zoom (only in normal mode)
-        if (!is3DMode) {
-            const now = Date.now();
-            const DOUBLE_TAP_DELAY = 300;
-            if (now - lastTap < DOUBLE_TAP_DELAY && e.touches.length === 1) {
-                e.preventDefault();
-                if (scale > 1) {
-                    handleReset();
-                } else {
-                    setScale(2);
-                }
-                setLastTap(0);
-                return;
-            }
-            setLastTap(now);
-        }
-
-        if (is3DMode && e.touches.length === 1) {
-            // 3D mode: touch to rotate (will handle in move)
+        // Double tap to zoom
+        const now = Date.now();
+        const DOUBLE_TAP_DELAY = 300;
+        if (now - lastTap < DOUBLE_TAP_DELAY && e.touches.length === 1) {
             e.preventDefault();
-        } else if (e.touches.length === 2 && !is3DMode) {
-            // Pinch to zoom (only in normal mode)
+            if (scale > 1) {
+                handleReset();
+            } else {
+                setScale(2);
+            }
+            setLastTap(0);
+            return;
+        }
+        setLastTap(now);
+
+        if (e.touches.length === 2) {
+            // Pinch to zoom
             e.preventDefault();
             const distance = getTouchDistance(e.touches[0], e.touches[1]);
             setInitialPinchDistance(distance);
             setInitialScale(scale);
             setIsDragging(false);
-        } else if (e.touches.length === 1 && !is3DMode) {
-            // Single finger drag (works at any zoom level in normal mode)
+        } else if (e.touches.length === 1) {
+            // Single finger for 3D tilt OR drag when zoomed
             const touch = e.touches[0];
             setIsDragging(true);
             setDragStart({
@@ -151,15 +123,21 @@ const ModalZoom = ({ imagen, onClose }) => {
     };
 
     const handleTouchMove = (e) => {
-        if (is3DMode && e.touches.length === 1 && containerRef.current) {
-            // 3D mode rotation with touch
+        if (e.touches.length === 2 && initialPinchDistance) {
+            // Pinch zoom
             e.preventDefault();
-            const rect = containerRef.current.getBoundingClientRect();
+            const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
+            const scaleChange = currentDistance / initialPinchDistance;
+            const newScale = Math.max(0.5, Math.min(5, initialScale * scaleChange));
+            setScale(newScale);
+        } else if (e.touches.length === 1 && containerRef.current) {
+            e.preventDefault();
             const touch = e.touches[0];
+            const rect = containerRef.current.getBoundingClientRect();
             const x = touch.clientX - rect.left;
             const y = touch.clientY - rect.top;
 
-            // Calculate tilt based on touch position relative to center
+            // Calculate 3D tilt
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
@@ -168,25 +146,18 @@ const ModalZoom = ({ imagen, onClose }) => {
 
             setTilt({ x: rotateX, y: rotateY });
 
-            // Show back image when rotated past 90 degrees (if available)
+            // Show back image when rotated past 90 degrees
             if (imagenTrasera) {
                 setMostrarTrasera(Math.abs(rotateY) > 90);
             }
-        } else if (e.touches.length === 2 && initialPinchDistance && !is3DMode) {
-            // Pinch zoom (normal mode)
-            e.preventDefault();
-            const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
-            const scaleChange = currentDistance / initialPinchDistance;
-            const newScale = Math.max(0.5, Math.min(5, initialScale * scaleChange));
-            setScale(newScale);
-        } else if (e.touches.length === 1 && isDragging && !is3DMode) {
-            // Pan/drag with single finger (normal mode)
-            e.preventDefault();
-            const touch = e.touches[0];
-            setPosition({
-                x: touch.clientX - dragStart.x,
-                y: touch.clientY - dragStart.y
-            });
+
+            // Also handle pan when zoomed
+            if (scale > 1 && isDragging) {
+                setPosition({
+                    x: touch.clientX - dragStart.x,
+                    y: touch.clientY - dragStart.y
+                });
+            }
         }
     };
 
@@ -200,18 +171,14 @@ const ModalZoom = ({ imagen, onClose }) => {
     };
 
     const handleWheel = (e) => {
-        if (!is3DMode) {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? -0.1 : 0.1;
-            setScale(prev => Math.max(0.5, Math.min(5, prev + delta)));
-        }
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        setScale(prev => Math.max(0.5, Math.min(5, prev + delta)));
     };
 
     useEffect(() => {
         const handleKeyPress = (e) => {
             if (e.key === 'Escape') onClose();
-            if (e.key === '+' || e.key === '=') handleZoomIn();
-            if (e.key === '-') handleZoomOut();
             if (e.key === 'r' || e.key === 'R') handleRotate();
             if (e.key === '0') handleReset();
         };
@@ -222,86 +189,36 @@ const ModalZoom = ({ imagen, onClose }) => {
 
     return (
         <div
-            className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 perspective-1000"
+            className="fixed inset-0 bg-black/95 flex items-center justify-center z-50"
             onClick={onClose}
         >
             {/* Close Button */}
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
+                className="absolute top-4 right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
                 title="Cerrar (Esc)"
             >
                 <X size={24} />
             </button>
 
-            {/* Zoom Controls */}
-            <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleZoomIn();
-                    }}
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                    title="Acercar (+)"
-                    disabled={is3DMode}
-                >
-                    <ZoomIn size={20} className={is3DMode ? 'opacity-50' : ''} />
-                </button>
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleZoomOut();
-                    }}
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                    title="Alejar (-)"
-                    disabled={is3DMode}
-                >
-                    <ZoomOut size={20} className={is3DMode ? 'opacity-50' : ''} />
-                </button>
+            {/* Controls - Simplified */}
+            <div className="absolute top-4 left-4 flex gap-3 z-10">
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         handleRotate();
                     }}
-                    className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
                     title="Rotar (R)"
                 >
-                    <RotateCw size={20} />
-                </button>
-                {imagenTrasera && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleFlip();
-                        }}
-                        className={`p-2 rounded-full transition-colors ${mostrarTrasera ? 'bg-purple-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'}`}
-                        title="Voltear (Ver otra cara)"
-                    >
-                        <FlipHorizontal size={20} />
-                    </button>
-                )}
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setIs3DMode(!is3DMode);
-                        if (!is3DMode) {
-                            setScale(1);
-                            setPosition({ x: 0, y: 0 });
-                        } else {
-                            setTilt({ x: 0, y: 0 });
-                        }
-                    }}
-                    className={`p-2 rounded-full transition-colors ${is3DMode ? 'bg-indigo-600 text-white' : 'bg-white/10 hover:bg-white/20 text-white'}`}
-                    title="Efecto 3D"
-                >
-                    <Box size={20} />
+                    <RotateCw size={22} />
                 </button>
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
                         handleReset();
                     }}
-                    className="px-3 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors"
+                    className="px-4 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors"
                     title="Reiniciar (0)"
                 >
                     Reset
@@ -309,23 +226,22 @@ const ModalZoom = ({ imagen, onClose }) => {
             </div>
 
             {/* Zoom Level Indicator */}
-            {!is3DMode && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium">
+            {scale !== 1 && (
+                <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium">
                     {Math.round(scale * 100)}%
                 </div>
             )}
 
-            {is3DMode && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full bg-indigo-600/80 text-white text-sm font-medium animate-pulse">
-                    <span className="hidden md:inline">Mueve el mouse para rotar en 3D</span>
-                    <span className="md:hidden">Mueve el dedo para rotar en 3D</span>
-                </div>
-            )}
+            {/* 3D Mode Indicator */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full bg-indigo-600/80 text-white text-sm font-medium">
+                <span className="hidden md:inline">Mueve el mouse para rotar en 3D • Rueda para zoom</span>
+                <span className="md:hidden">Mueve el dedo para rotar • Pellizca para zoom</span>
+            </div>
 
             {/* Image Container */}
             <div
                 ref={containerRef}
-                className="relative w-full h-full flex items-center justify-center overflow-hidden perspective-1000"
+                className="relative w-full h-full flex items-center justify-center overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -336,7 +252,7 @@ const ModalZoom = ({ imagen, onClose }) => {
                 onTouchEnd={handleTouchEnd}
                 onWheel={handleWheel}
                 style={{
-                    cursor: is3DMode ? 'move' : (scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'),
+                    cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'move',
                     perspective: '1000px'
                 }}
             >
@@ -346,28 +262,18 @@ const ModalZoom = ({ imagen, onClose }) => {
                     alt={mostrarTrasera ? "Trasera" : "Frontal"}
                     className="max-w-[85vw] max-h-[85vh] object-contain select-none transition-transform duration-100 ease-out"
                     style={{
-                        transform: is3DMode
-                            ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) rotate(${rotation}deg) scale(1.2)`
-                            : `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px) rotate(${rotation}deg)`,
-                        boxShadow: is3DMode ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : 'none'
+                        transform: `
+                            perspective(1000px)
+                            rotateX(${tilt.x}deg) 
+                            rotateY(${tilt.y}deg) 
+                            rotate(${rotation}deg) 
+                            scale(${scale})
+                            translate(${position.x / scale}px, ${position.y / scale}px)
+                        `,
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
                     }}
                     draggable={false}
                 />
-            </div>
-
-            {/* Instructions */}
-            <div className="absolute bottom-4 right-4 text-white/60 text-xs text-right">
-                {is3DMode ? (
-                    <div>Mueve el cursor para efecto 3D</div>
-                ) : (
-                    <>
-                        <div className="hidden md:block">Rueda del mouse: Zoom</div>
-                        <div className="hidden md:block">Arrastrar: Mover imagen</div>
-                        <div className="md:hidden">Pellizcar: Zoom</div>
-                        <div className="md:hidden">Doble toque: Zoom rápido</div>
-                        <div className="md:hidden">Deslizar: Mover imagen</div>
-                    </>
-                )}
             </div>
         </div>
     );
