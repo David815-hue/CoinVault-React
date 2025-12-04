@@ -277,10 +277,10 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                             <span className={`text-2xl ${modoOscuro ? 'text-gray-400' : 'text-gray-500'}`}>({items.length})</span>
                         </h1>
 
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                             <button
                                 onClick={() => setVistaDisplay(vistaDisplay === 'cuadricula' ? 'lista' : 'cuadricula')}
-                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
+                                className={`p-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
                                     ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
@@ -291,22 +291,22 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
 
                             <button
                                 onClick={() => setMostrarFiltros(!mostrarFiltros)}
-                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${filtrosActivos
+                                className={`p-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2 ${filtrosActivos
                                     ? 'bg-purple-600 text-white'
                                     : modoOscuro
                                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
+                                title="Filtros"
                             >
                                 <Filter size={20} />
-                                <span className="hidden sm:inline">Filtros</span>
                                 {filtrosActivos && <span className="bg-white text-purple-600 text-xs px-1.5 py-0.5 rounded-full">{Object.values(filtros).filter(f => f !== '').length}</span>}
                             </button>
 
                             <div className="relative">
                                 <button
                                     onClick={() => setMostrarMenuExportar(!mostrarMenuExportar)}
-                                    className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
+                                    className={`p-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
                                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
@@ -339,7 +339,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                     setCompareMode(!compareMode);
                                     if (compareMode) setSelectedForCompare([]);
                                 }}
-                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${compareMode
+                                className={`p-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2 ${compareMode
                                     ? 'bg-indigo-600 text-white'
                                     : modoOscuro
                                         ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -348,19 +348,17 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                 title="Comparar items"
                             >
                                 <GitCompare size={20} />
-                                <span className="hidden md:inline">{compareMode ? 'Cancelar' : 'Comparar'}</span>
                             </button>
 
                             <button
                                 onClick={() => setSlideshowActivo(true)}
-                                className={`px-4 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
+                                className={`p-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2 ${modoOscuro
                                     ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 title="Modo presentación"
                             >
                                 <Play size={20} />
-                                <span className="hidden md:inline">Slideshow</span>
                             </button>
 
                             <button
@@ -368,10 +366,10 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                                     setTipoFormulario(tipo);
                                     setVista('formulario');
                                 }}
-                                className="bg-[var(--color-primary)] text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-[var(--color-primary-hover)] transition-colors flex items-center gap-2"
+                                className="bg-[var(--color-primary)] text-white p-2.5 rounded-lg font-semibold hover:bg-[var(--color-primary-hover)] transition-colors flex items-center gap-2"
+                                title="Agregar"
                             >
                                 <Plus size={20} />
-                                <span className="hidden sm:inline">Agregar</span>
                             </button>
                         </div>
                     </div>
