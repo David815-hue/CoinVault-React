@@ -179,6 +179,118 @@
   /* Sky 900 */
 }
 
+/* --- VARIANTS --- */
+
+/* Compact */
+:root[data-variant="compact"] {}
+
+:root[data-variant="compact"] :not(.album-viewer):not(.album-viewer *) {
+  --spacing-unit: 0.75rem;
+  font-size: 14px;
+}
+
+/* Glass */
+:root[data-variant="glass"] {
+  --bg-primary-light: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop');
+  --bg-primary-dark: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2072&auto=format&fit=crop');
+}
+
+:root[data-variant="glass"] body {
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+}
+
+:root[data-variant="glass"] .bg-white:not(.album-viewer *),
+:root[data-variant="glass"] .bg-gray-50:not(.album-viewer *),
+:root[data-variant="glass"] .bg-slate-800:not(.album-viewer *),
+:root[data-variant="glass"] .bg-slate-900:not(.album-viewer *) {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+:root[data-variant="glass"].dark .bg-white:not(.album-viewer *),
+:root[data-variant="glass"].dark .bg-gray-50:not(.album-viewer *),
+:root[data-variant="glass"].dark .bg-slate-800:not(.album-viewer *),
+:root[data-variant="glass"].dark .bg-slate-900:not(.album-viewer *) {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Cyber */
+:root[data-variant="cyber"] {
+  --bg-primary-light: #050505;
+  --bg-secondary-light: #1a1a1a;
+  --text-primary-light: #00ff41;
+  --text-secondary-light: #008f11;
+  --color-primary: #00ff41;
+  --color-primary-hover: #008f11;
+}
+
+:root[data-variant="cyber"] :not(.album-viewer):not(.album-viewer *) {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+:root[data-variant="cyber"] body {
+  background-color: #000000;
+  background-image: linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+:root[data-variant="cyber"] *:not(.album-viewer):not(.album-viewer *) {
+  border-radius: 0 !important;
+}
+
+:root[data-variant="cyber"] .bg-white:not(.album-viewer *),
+:root[data-variant="cyber"] .bg-gray-50:not(.album-viewer *),
+:root[data-variant="cyber"] .bg-slate-800:not(.album-viewer *),
+:root[data-variant="cyber"] .bg-slate-900:not(.album-viewer *) {
+  background-color: #0a0a0a !important;
+  border: 1px solid #00ff41 !important;
+  box-shadow: 0 0 5px rgba(0, 255, 65, 0.2), inset 0 0 10px rgba(0, 255, 65, 0.05) !important;
+}
+
+:root[data-variant="cyber"] button:not(.album-viewer *) {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+:root[data-variant="cyber"] .text-gray-500:not(.album-viewer *),
+:root[data-variant="cyber"] .text-slate-500:not(.album-viewer *) {
+  color: #008f11 !important;
+}
+
+/* Retro */
+:root[data-variant="retro"] {
+  --bg-primary-light: #fdf6e3;
+  --bg-secondary-light: #eee8d5;
+  --text-primary-light: #657b83;
+  --color-primary: #cb4b16;
+}
+
+:root[data-variant="retro"] :not(.album-viewer):not(.album-viewer *) {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+:root[data-variant="retro"] *:not(.album-viewer):not(.album-viewer *) {
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+  border: 2px solid black !important;
+}
+
+:root[data-variant="retro"].dark {
+  --bg-primary-dark: #002b36;
+  --bg-secondary-dark: #073642;
+  --text-primary-dark: #839496;
+}
+
+:root[data-variant="retro"].dark *:not(.album-viewer):not(.album-viewer *) {
+  box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.5) !important;
+  border: 2px solid rgba(255, 255, 255, 0.5) !important;
+}
+
 body {
   margin: 0;
   min-width: 320px;

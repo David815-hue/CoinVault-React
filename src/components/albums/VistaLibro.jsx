@@ -8,12 +8,24 @@ const Page = React.forwardRef(({ children, number, modoOscuro, design }, ref) =>
     const getPageStyle = () => {
         if (design === 'modern') return 'bg-white text-slate-800';
         if (design === 'minimal') return 'bg-gray-50 text-gray-800';
+        if (design === 'vintage') return 'bg-[#f4e4bc] text-[#5c4033] font-serif';
+        if (design === 'grid') return 'bg-slate-100 text-slate-800';
+        if (design === 'elegant') return 'bg-slate-900 text-amber-100';
         return modoOscuro ? 'bg-slate-800 text-white' : 'bg-amber-50 text-slate-800'; // Classic default
+    };
+
+    const getBorderClass = () => {
+        if (design === 'minimal') return 'border-0';
+        if (design === 'vintage') return 'border-4 border-double border-[#8b5a2b]';
+        if (design === 'elegant') return 'border-2 border-amber-500/30';
+        if (design === 'grid') return 'border-2 border-dashed border-slate-300';
+        return 'border-2 border-dashed border-gray-300';
     };
 
     return (
         <div className={`page ${getPageStyle()} h-full border-r border-gray-300 shadow-inner p-8`} ref={ref}>
-            <div className={`h-full ${design === 'minimal' ? 'border-0' : 'border-2 border-dashed border-gray-300'} p-4 rounded-xl flex flex-col`}>
+            <div className={`h-full ${getBorderClass()} p-4 rounded-xl flex flex-col relative overflow-hidden`}>
+                {design === 'vintage' && <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')]"></div>}
                 {children}
                 <div className="mt-auto text-center text-xs text-gray-400">
                     {number}
@@ -52,6 +64,10 @@ const VistaLibro = ({ album, onBack }) => {
             rose: 'bg-rose-900 border-rose-950',
             amber: 'bg-amber-900 border-amber-950',
             cyan: 'bg-cyan-900 border-cyan-950',
+            slate: 'bg-slate-900 border-slate-950',
+            violet: 'bg-violet-900 border-violet-950',
+            crimson: 'bg-red-900 border-red-950',
+            teal: 'bg-teal-900 border-teal-950',
         };
         return colors[color] || colors.indigo;
     };
@@ -63,6 +79,10 @@ const VistaLibro = ({ album, onBack }) => {
             rose: 'text-rose-200',
             amber: 'text-amber-200',
             cyan: 'text-cyan-200',
+            slate: 'text-slate-200',
+            violet: 'text-violet-200',
+            crimson: 'text-red-200',
+            teal: 'text-teal-200',
         };
         return colors[color] || colors.indigo;
     };
@@ -79,7 +99,7 @@ const VistaLibro = ({ album, onBack }) => {
     const coverTextColorClass = getCoverTextColor(album.color);
 
     return (
-        <div className={`min-h-screen flex flex-col items-center justify-center p-8 ${modoOscuro ? 'bg-gray-900' : 'bg-gray-100'}`}>
+        <div className={`album-viewer min-h-screen flex flex-col items-center justify-center p-8 ${modoOscuro ? 'bg-gray-900' : 'bg-gray-100'}`}>
             <button
                 onClick={onBack}
                 className="absolute top-8 left-8 flex items-center gap-2 text-[var(--color-primary)] font-bold hover:text-[var(--color-primary-hover)] z-10"
@@ -97,9 +117,12 @@ const VistaLibro = ({ album, onBack }) => {
                     ref={bookRef}
                 >
                     {/* Cover */}
-                    <div className={`cover ${coverColorClass} text-white p-10 flex flex-col items-center justify-center text-center h-full border-r-4`}>
-                        <BookOpen size={64} className="mb-6 text-white/80" />
-                        <h1 className={`text-4xl font-bold mb-4 ${album.design === 'modern' ? 'font-sans' : 'font-serif'}`}>{album.title}</h1>
+                    <div className={`cover ${coverColorClass} text-white p-10 flex flex-col items-center justify-center text-center h-full border-r-4 relative overflow-hidden`}>
+                        {album.design === 'elegant' && <div className="absolute inset-0 border-8 border-double border-amber-500/30 m-4 pointer-events-none"></div>}
+                        {album.design === 'vintage' && <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>}
+
+                        <BookOpen size={64} className="mb-6 text-white/80 relative z-10" />
+                        <h1 className={`text-4xl font-bold mb-4 relative z-10 ${album.design === 'modern' ? 'font-sans' : 'font-serif'}`}>{album.title}</h1>
                         <p className={coverTextColorClass}>{album.description}</p>
                         <div className={`mt-12 text-sm ${coverTextColorClass} uppercase tracking-widest`}>Colección Privada</div>
                     </div>
@@ -107,12 +130,19 @@ const VistaLibro = ({ album, onBack }) => {
                     {/* Pages */}
                     {items.map((item, index) => (
                         <Page number={index + 1} key={item.id} modoOscuro={modoOscuro} design={album.design}>
-                            <div className="flex flex-col h-full items-center">
-                                <h3 className={`text-xl font-bold mb-4 text-center ${album.design === 'modern' ? 'font-sans' : 'font-serif'}`}>{item.nombre}</h3>
+                            <div className="flex flex-col h-full items-center relative z-10">
+                                <h3 className={`text-xl font-bold mb-4 text-center ${album.design === 'modern' ? 'font-sans' :
+                                    album.design === 'vintage' ? 'font-serif tracking-widest text-[#3e2723]' :
+                                        album.design === 'elegant' ? 'font-serif text-amber-200' : 'font-serif'
+                                    }`}>{item.nombre}</h3>
 
-                                <div className={`relative mb-6 shadow-xl overflow-hidden border-4 border-amber-500/20 ${item.type === 'monedas'
-                                    ? 'w-48 h-48 rounded-full'
-                                    : 'w-64 h-32 rounded-lg'
+                                <div className={`relative mb-6 shadow-xl overflow-hidden ${album.design === 'vintage' ? 'border-4 border-[#8b5a2b] sepia-[.3]' :
+                                    album.design === 'elegant' ? 'border-2 border-amber-500/50 shadow-amber-500/20' :
+                                        album.design === 'grid' ? 'border-2 border-slate-200 rounded-xl' :
+                                            'border-4 border-amber-500/20'
+                                    } ${item.type === 'monedas'
+                                        ? 'w-48 h-48 rounded-full'
+                                        : 'w-64 h-32 rounded-lg'
                                     }`}>
                                     <img
                                         src={item.fotoFrontal || 'https://via.placeholder.com/150'}

@@ -45,18 +45,27 @@ const ModalCrearAlbum = ({ onClose }) => {
         b.ano.toString().includes(searchTerm)
     );
 
+
+
+    const designs = [
+        { id: 'classic', name: 'Clásico' },
+        { id: 'modern', name: 'Moderno' },
+        { id: 'minimal', name: 'Minimalista' },
+        { id: 'vintage', name: 'Vintage' },
+        { id: 'grid', name: 'Cuadrícula' },
+        { id: 'elegant', name: 'Elegante' },
+    ];
+
     const colors = [
         { id: 'indigo', class: 'bg-indigo-500' },
         { id: 'emerald', class: 'bg-emerald-500' },
         { id: 'rose', class: 'bg-rose-500' },
         { id: 'amber', class: 'bg-amber-500' },
         { id: 'cyan', class: 'bg-cyan-500' },
-    ];
-
-    const designs = [
-        { id: 'classic', name: 'Clásico' },
-        { id: 'modern', name: 'Moderno' },
-        { id: 'minimal', name: 'Minimalista' },
+        { id: 'slate', class: 'bg-slate-500' },
+        { id: 'violet', class: 'bg-violet-500' },
+        { id: 'crimson', class: 'bg-red-600' },
+        { id: 'teal', class: 'bg-teal-500' },
     ];
 
     return (
@@ -102,12 +111,13 @@ const ModalCrearAlbum = ({ onClose }) => {
                             <label className="block text-sm font-medium mb-2 flex items-center gap-2">
                                 <Palette size={16} /> Color del Álbum
                             </label>
-                            <div className="flex gap-3">
+                            <div className="flex flex-wrap gap-3">
                                 {colors.map(c => (
                                     <button
                                         key={c.id}
                                         onClick={() => setFormData({ ...formData, color: c.id })}
                                         className={`w-10 h-10 rounded-full ${c.class} transition-transform hover:scale-110 flex items-center justify-center ${formData.color === c.id ? 'ring-4 ring-offset-2 ring-gray-400' : ''}`}
+                                        title={c.id}
                                     >
                                         {formData.color === c.id && <Check size={16} className="text-white" />}
                                     </button>
@@ -118,20 +128,15 @@ const ModalCrearAlbum = ({ onClose }) => {
                             <label className="block text-sm font-medium mb-2 flex items-center gap-2">
                                 <Layout size={16} /> Diseño
                             </label>
-                            <div className="flex gap-2">
+                            <select
+                                value={formData.design}
+                                onChange={e => setFormData({ ...formData, design: e.target.value })}
+                                className={`w-full p-3 rounded-lg border appearance-none ${modoOscuro ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+                            >
                                 {designs.map(d => (
-                                    <button
-                                        key={d.id}
-                                        onClick={() => setFormData({ ...formData, design: d.id })}
-                                        className={`px-4 py-2 rounded-lg border transition-colors ${formData.design === d.id
-                                            ? 'bg-[var(--color-primary)] text-white border-transparent'
-                                            : modoOscuro ? 'border-gray-600 hover:bg-gray-700' : 'border-gray-300 hover:bg-gray-50'
-                                            }`}
-                                    >
-                                        {d.name}
-                                    </button>
+                                    <option key={d.id} value={d.id}>{d.name}</option>
                                 ))}
-                            </div>
+                            </select>
                         </div>
                     </div>
 

@@ -4,7 +4,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 
 const ModalTemas = ({ onClose }) => {
-    const { modoOscuro, toggleModoOscuro, temaColor, cambiarTemaColor } = useTheme();
+    const { modoOscuro, toggleModoOscuro, temaColor, cambiarTemaColor, themeVariant, cambiarVariant } = useTheme();
     const { exportarBackup, importarBackup } = useCollection();
 
     const handleExportar = async () => {
@@ -107,6 +107,33 @@ const ModalTemas = ({ onClose }) => {
                                         )}
                                     </div>
                                     <span className="text-[10px] font-medium opacity-70">{theme.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Variant Selection */}
+                    <div>
+                        <h3 className="text-sm font-medium mb-3 opacity-70">Estilo de Interfaz</h3>
+                        <div className="grid grid-cols-3 gap-3">
+                            {[
+                                { id: 'standard', name: 'Estándar' },
+                                { id: 'compact', name: 'Compacto' },
+                                { id: 'glass', name: 'Glass' },
+                                { id: 'cyber', name: 'Cyber' },
+                                { id: 'retro', name: 'Retro' }
+                            ].map((variant) => (
+                                <button
+                                    key={variant.id}
+                                    onClick={() => cambiarVariant(variant.id)}
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border ${themeVariant === variant.id
+                                        ? 'bg-[var(--color-primary)] text-white border-transparent shadow-md'
+                                        : modoOscuro
+                                            ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-300'
+                                            : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
+                                        }`}
+                                >
+                                    {variant.name}
                                 </button>
                             ))}
                         </div>
