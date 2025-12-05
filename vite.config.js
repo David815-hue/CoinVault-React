@@ -6,7 +6,7 @@ import crossOriginIsolation from 'vite-plugin-cross-origin-isolation'
 export default defineConfig({
   plugins: [
     react(),
-    crossOriginIsolation()
+    // crossOriginIsolation() // Disabling this to allow Google OAuth popups
   ],
   optimizeDeps: {
     exclude: ['@sqlite.org/sqlite-wasm'],

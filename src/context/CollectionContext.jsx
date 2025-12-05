@@ -167,15 +167,30 @@ export const CollectionProvider = ({ children }) => {
         return { totalMonedas, totalBilletes, total: totalMonedas + totalBilletes };
     };
 
-    const exportarBackup = async () => {
+    const generateBackupData = () => {
+        console.log('🔄 Generando backup data desde estado:', {
+            monedasCount: monedas.length,
+            billetesCount: billetes.length,
+            wishlistCount: wishlist.length,
+            albumsCount: albums.length
+        });
+        return {
+            monedas,
+            billetes,
+            wishlist,
+            albums, // Added albums to backup as well
+            fecha: new Date().toISOString(),
+            version: '1.0'
+        };
+    };
+
+    const exportarBackup = async (returnOnly = false) => {
         try {
-            const backupData = {
-                monedas,
-                billetes,
-                wishlist,
-                fecha: new Date().toISOString(),
-                version: '1.0'
-            };
+            const backupData = generateBackupData();
+
+            if (returnOnly) {
+                return backupData;
+            }
 
             const jsonString = JSON.stringify(backupData, null, 2);
 
