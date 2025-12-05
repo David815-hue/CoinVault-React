@@ -3,15 +3,13 @@ import localforage from 'localforage';
 
 export const useTheme = () => {
     const [modoOscuro, setModoOscuro] = useState(false);
-    const [temaColor, setTemaColor] = useState('indigo'); // indigo, emerald, rose, amber, cyan
-    const [themeVariant, setThemeVariant] = useState('standard'); // standard, compact, glass, neo, retro
+    const [tema, setTema] = useState('indigo'); // indigo, aurora, midnight, ocean, sunset, mint
 
     useEffect(() => {
         const loadTheme = async () => {
             try {
                 const savedDarkMode = await localforage.getItem('modoOscuro');
-                const savedColorTheme = await localforage.getItem('temaColor');
-                const savedVariant = await localforage.getItem('themeVariant');
+                const savedTema = await localforage.getItem('tema');
 
                 if (savedDarkMode !== null) {
                     setModoOscuro(savedDarkMode);
@@ -22,18 +20,11 @@ export const useTheme = () => {
                     }
                 }
 
-                if (savedColorTheme) {
-                    setTemaColor(savedColorTheme);
-                    document.documentElement.setAttribute('data-theme', savedColorTheme);
+                if (savedTema) {
+                    setTema(savedTema);
+                    document.documentElement.setAttribute('data-theme', savedTema);
                 } else {
                     document.documentElement.setAttribute('data-theme', 'indigo');
-                }
-
-                if (savedVariant) {
-                    setThemeVariant(savedVariant);
-                    document.documentElement.setAttribute('data-variant', savedVariant);
-                } else {
-                    document.documentElement.setAttribute('data-variant', 'standard');
                 }
             } catch (error) {
                 console.error('Error loading theme:', error);
@@ -58,29 +49,28 @@ export const useTheme = () => {
         }
     };
 
-    const cambiarTemaColor = async (color) => {
-        setTemaColor(color);
-        document.documentElement.setAttribute('data-theme', color);
+    const cambiarTema = async (nuevoTema) => {
+        setTema(nuevoTema);
+        document.documentElement.setAttribute('data-theme', nuevoTema);
         try {
-            await localforage.setItem('temaColor', color);
+            await localforage.setItem('tema', nuevoTema);
         } catch (error) {
-            console.error('Error saving color theme:', error);
+            console.error('Error saving theme:', error);
         }
     };
 
-    const cambiarVariant = async (variant) => {
-        setThemeVariant(variant);
-        document.documentElement.setAttribute('data-variant', variant);
-        try {
-            await localforage.setItem('themeVariant', variant);
-        } catch (error) {
-            console.error('Error saving theme variant:', error);
-        }
-    };
+    // Legacy support for old code that uses temaColor
+    const temaColor = tema;
+    const cambiarTemaColor = cambiarTema;
+    const themeVariant = 'standard';
+    const cambiarVariant = () => { };
 
     return {
         modoOscuro,
         toggleModoOscuro,
+        tema,
+        cambiarTema,
+        // Legacy exports
         temaColor,
         cambiarTemaColor,
         themeVariant,
