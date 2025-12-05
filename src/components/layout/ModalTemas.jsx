@@ -7,7 +7,7 @@ import { initGoogleDrive, uploadBackupFile, findBackupFile, downloadBackupFile }
 
 // Drive Section Component
 const DriveSection = ({ onClose, modoOscuro }) => {
-    const { exportarBackup, importarBackup } = useCollection();
+    const { exportarBackup, importarBackup, generateCompressedBackupData } = useCollection();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
     const [driveStatus, setDriveStatus] = useState('');
@@ -53,14 +53,9 @@ const DriveSection = ({ onClose, modoOscuro }) => {
     const handleUpload = async () => {
         setLoading(true);
         try {
-            const backupData = await exportarBackup(true);
-            console.log('📦 Backup data obtenido para Drive:', backupData);
-            console.log('📊 Estadísticas:', {
-                monedas: backupData?.monedas?.length || 0,
-                billetes: backupData?.billetes?.length || 0,
-                wishlist: backupData?.wishlist?.length || 0,
-                albums: backupData?.albums?.length || 0
-            });
+            // Use compressed backup for Google Drive
+            const backupData = await generateCompressedBackupData();
+
             if (backupData) {
                 await uploadBackupFile(backupData);
                 alert('✅ Backup subido correctamente a Google Drive');

@@ -1,4 +1,5 @@
 import { gapi } from 'gapi-script';
+import pako from 'pako';
 
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 const SCOPES = "https://www.googleapis.com/auth/drive.file";
@@ -26,18 +27,31 @@ export const initGoogleDrive = (accessToken) => {
 
 export const findBackupFile = async () => {
     try {
-        const response = await gapi.client.drive.files.list({
+        // Try to find compressed backup first (.json.gz)
+        let response = await gapi.client.drive.files.list({
+            q: "name = 'coinvault_backup.json.gz' and trashed = false",
+            fields: "files(id, name, createdTime)",
+            spaces: 'drive'
+        });
+
+        let files = response.result.files;
+        if (files && files.length > 0) {
+            return files[0];
+        }
+
+        // Fallback: search for old uncompressed backup
+        response = await gapi.client.drive.files.list({
             q: "name = 'coinvault_backup.json' and trashed = false",
             fields: "files(id, name, createdTime)",
             spaces: 'drive'
         });
 
-        const files = response.result.files;
+        files = response.result.files;
         if (files && files.length > 0) {
             return files[0];
-        } else {
-            return null;
         }
+
+        return null;
     } catch (error) {
         console.error("Error finding backup file", error);
         throw error;
@@ -46,36 +60,91 @@ export const findBackupFile = async () => {
 
 export const downloadBackupFile = async (fileId) => {
     try {
-        const response = await gapi.client.drive.files.get({
+        // Get file info to check if compressed
+        const fileInfo = await gapi.client.drive.files.get({
             fileId: fileId,
-            alt: 'media'
+            fields: 'name,mimeType'
         });
-        return response.result || response.body;
+
+        const fileName = fileInfo.result.name;
+        const shouldBeCompressed = fileName.endsWith('.gz') || fileInfo.result.mimeType === 'application/gzip';
+
+        console.log(`📥 Descargando: ${fileName} (Debería estar comprimido: ${shouldBeCompressed})`);
+
+        // Get access token
+        const token = gapi.auth.getToken().access_token;
+
+        // Use XMLHttpRequest with arraybuffer to avoid UTF-8 corruption
+        const arrayBuffer = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+            xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            xhr.responseType = 'arraybuffer'; // Critical: prevents UTF-8 interpretation
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    resolve(xhr.response);
+                } else {
+                    reject(new Error(`HTTP error! status: ${xhr.status}`));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Network error'));
+            xhr.send();
+        });
+
+        // Always download as ArrayBuffer to inspect the data
+        const data = new Uint8Array(arrayBuffer);
+
+        // Check GZIP magic number (0x1F 0x8B)
+        const isActuallyGZIP = data.length >= 2 && data[0] === 0x1F && data[1] === 0x8B;
+
+        console.log(`🔍 Verificación:`, {
+            tamaño: data.length,
+            primerosByte: Array.from(data.slice(0, 10)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '),
+            esGZIPReal: isActuallyGZIP,
+            deberiaSerGZIP: shouldBeCompressed
+        });
+
+        // If it's actually GZIP, decompress it
+        if (isActuallyGZIP) {
+            console.log('🗜️ GZIP detectado, descomprimiendo...');
+            try {
+                const decompressed = pako.ungzip(data, { to: 'string' });
+                console.log('✅ Descompresión exitosa');
+                return JSON.parse(decompressed);
+            } catch (decompressError) {
+                console.error('❌ Error descomprimiendo:', decompressError);
+                throw new Error('No se pudo descomprimir el backup');
+            }
+        }
+
+        // Not actually GZIP, treat as plain text/JSON
+        console.log('📄 No es GZIP, parseando como JSON...');
+        const text = new TextDecoder().decode(data);
+        return JSON.parse(text);
     } catch (error) {
         console.error("Error downloading backup file", error);
         throw error;
     }
 };
 
+
 export const uploadBackupFile = async (data) => {
     try {
-        console.log('☁️ uploadBackupFile recibió:', data);
-        console.log('☁️ Tipo de data:', typeof data);
-        console.log('☁️ Datos a stringificar:', {
-            monedas: data?.monedas?.length || 0,
-            billetes: data?.billetes?.length || 0,
-            wishlist: data?.wishlist?.length || 0,
-            albums: data?.albums?.length || 0
-        });
+        // Convert data to JSON string
+        const jsonString = JSON.stringify(data);
 
-        const fileContent = JSON.stringify(data);
-        console.log('☁️ JSON string length:', fileContent.length);
-        console.log('☁️ JSON preview (primeros 200 chars):', fileContent.substring(0, 200));
+        // Compress with GZIP
+        const compressed = pako.gzip(jsonString);
+        console.log(`📦 Backup: ${(jsonString.length / 1024).toFixed(0)} KB → ${(compressed.length / 1024).toFixed(0)} KB (${((1 - compressed.length / jsonString.length) * 100).toFixed(0)}% reducción)`);
 
-        const file = new Blob([fileContent], { type: 'application/json' });
+        // Create blob with compressed data
+        const file = new Blob([compressed], { type: 'application/gzip' });
         const metadata = {
-            name: 'coinvault_backup.json',
-            mimeType: 'application/json',
+            name: 'coinvault_backup.json.gz',
+            mimeType: 'application/gzip',
+            description: 'CoinVault compressed backup (GZIP)'
         };
 
         const existingFile = await findBackupFile();
@@ -109,41 +178,45 @@ const uploadFileMultipart = (path, method, metadata, file) => {
 
             const contentType = file.type || 'application/octet-stream';
 
-            let body = delimiter +
+            // Build multipart body properly for binary data
+            const metadataPart = delimiter +
                 'Content-Type: application/json\r\n\r\n' +
                 JSON.stringify(metadata) +
                 delimiter +
-                'Content-Type: ' + contentType + '\r\n' +
-                '\r\n';
+                'Content-Type: ' + contentType + '\r\n\r\n';
 
-            // We need to combine the string body with the array buffer
-            // Since JS strings are UTF-16, this can be tricky.
-            // Using gapi.client.request might be easier if we can figure out the body format.
-            // But doing a raw fetch is often more reliable for uploads.
+            // Convert metadata string to Uint8Array
+            const encoder = new TextEncoder();
+            const metadataBytes = encoder.encode(metadataPart);
+            const fileBytes = new Uint8Array(e.target.result);
+            const closingBytes = encoder.encode(close_delim);
 
-            // Simpler approach using gapi request for small JSON files
-            const multipartRequestBody =
-                delimiter +
-                'Content-Type: application/json\r\n\r\n' +
-                JSON.stringify(metadata) +
-                delimiter +
-                'Content-Type: ' + contentType + '\r\n\r\n' +
-                new TextDecoder().decode(e.target.result) + // Decoding might be risky for binary, but JSON is text
-                close_delim;
+            // Combine all parts into single Uint8Array
+            const totalLength = metadataBytes.length + fileBytes.length + closingBytes.length;
+            const combined = new Uint8Array(totalLength);
+            combined.set(metadataBytes, 0);
+            combined.set(fileBytes, metadataBytes.length);
+            combined.set(closingBytes, metadataBytes.length + fileBytes.length);
 
-            gapi.client.request({
-                path: path,
-                method: method,
-                params: { uploadType: 'multipart' },
-                headers: {
-                    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-                },
-                body: multipartRequestBody
-            }).then(response => {
-                resolve(response.result);
-            }).catch(err => {
-                reject(err);
-            });
+            // Get access token
+            const token = gapi.auth.getToken().access_token;
+
+            // Use XMLHttpRequest to send binary data
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, path + '?uploadType=multipart');
+            xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            xhr.setRequestHeader('Content-Type', 'multipart/related; boundary="' + boundary + '"');
+
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else {
+                    reject(new Error(`Upload failed: ${xhr.status}`));
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Network error during upload'));
+            xhr.send(combined);
         };
     });
 };

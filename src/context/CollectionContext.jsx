@@ -3,6 +3,7 @@ import localforage from 'localforage';
 import { initDB, getItems, addItem, updateItem, deleteItem, toggleFavoritoDB, getAlbums, createAlbum, deleteAlbum, getAlbumItems } from '../services/platformDB';
 import { syncUserStats } from '../services/firebase';
 import { useAuth } from './AuthContext';
+import { compressImagesInObject } from '../utils/imageUtils';
 
 const CollectionContext = createContext();
 
@@ -168,12 +169,6 @@ export const CollectionProvider = ({ children }) => {
     };
 
     const generateBackupData = () => {
-        console.log('🔄 Generando backup data desde estado:', {
-            monedasCount: monedas.length,
-            billetesCount: billetes.length,
-            wishlistCount: wishlist.length,
-            albumsCount: albums.length
-        });
         return {
             monedas,
             billetes,
@@ -182,6 +177,22 @@ export const CollectionProvider = ({ children }) => {
             fecha: new Date().toISOString(),
             version: '1.0'
         };
+    };
+
+    // Generate compressed backup for Google Drive (with image compression)
+    const generateCompressedBackupData = async () => {
+        const backupData = generateBackupData();
+        console.log('🗜️ Comprimiendo imágenes para backup de Drive...');
+
+        try {
+            // Compress images in all collections (quality 0.7 = 70%)
+            const compressed = await compressImagesInObject(backupData, 0.7);
+            console.log('✅ Imágenes comprimidas exitosamente');
+            return compressed;
+        } catch (error) {
+            console.error('❌ Error comprimiendo imágenes, usando backup sin comprimir:', error);
+            return backupData; // Fallback to uncompressed
+        }
     };
 
     const exportarBackup = async (returnOnly = false) => {
@@ -319,6 +330,7 @@ export const CollectionProvider = ({ children }) => {
         calcularValorTotal,
         exportarBackup,
         importarBackup,
+        generateCompressedBackupData,
         crearNuevoAlbum,
         eliminarAlbumExistente,
         obtenerItemsAlbum
