@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Moon, Sun, Palette, Download, Upload, Sparkles, Gem, Waves, Sunset, Leaf, Cloud, LogOut, CheckCircle2 } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
@@ -13,9 +13,26 @@ const DriveSection = ({ onClose, modoOscuro }) => {
     const [driveStatus, setDriveStatus] = useState('');
     const [backupFound, setBackupFound] = useState(null);
 
+    // Auto-login on mount if token exists
+    useEffect(() => {
+        const savedToken = localStorage.getItem('google_drive_token');
+        if (savedToken) {
+            try {
+                const tokenData = JSON.parse(savedToken);
+                setUser(tokenData);
+                initializeDrive(tokenData.access_token);
+            } catch (error) {
+                console.error('Error loading saved token:', error);
+                localStorage.removeItem('google_drive_token');
+            }
+        }
+    }, []);
+
     const login = useGoogleLogin({
         onSuccess: (codeResponse) => {
             setUser(codeResponse);
+            // Save token to localStorage for persistent session
+            localStorage.setItem('google_drive_token', JSON.stringify(codeResponse));
             initializeDrive(codeResponse.access_token);
         },
         onError: (error) => {
@@ -95,6 +112,8 @@ const DriveSection = ({ onClose, modoOscuro }) => {
         setUser(null);
         setDriveStatus('');
         setBackupFound(null);
+        // Clear saved token from localStorage
+        localStorage.removeItem('google_drive_token');
     };
 
     return (
