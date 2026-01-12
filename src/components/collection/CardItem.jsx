@@ -58,9 +58,9 @@ const CardItem = ({ item, tipo, setVista, setItemEditando, setImagenZoom, compar
             </button>
 
             {/* 3D Flip Container */}
-            <div className="h-48 w-full relative">
+            <div className="h-40 sm:h-44 md:h-48 lg:h-52 w-full relative">
                 <div
-                    className="h-48 w-full cursor-pointer perspective-1000"
+                    className="h-full w-full cursor-pointer perspective-1000"
                     onClick={toggleFlip}
                 >
                     <div className={`w-full h-full relative transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>

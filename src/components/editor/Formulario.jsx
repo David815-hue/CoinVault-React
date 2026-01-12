@@ -6,6 +6,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useCollection } from '../../context/CollectionContext';
 import { PAISES, materialesMoneda, estadosConservacion } from '../../utils/constants';
 import ImageEditor from './ImageEditor';
+import CameraOverlay from './CameraOverlay';
 import CountrySelect from '../common/CountrySelect';
 import { compressImage } from '../../utils/imageUtils';
 
@@ -30,25 +31,35 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
 
     const [imagenEditando, setImagenEditando] = useState(null);
     const [tipoImagenEditando, setTipoImagenEditando] = useState(null);
+    const [showCameraOverlay, setShowCameraOverlay] = useState(false);
+    const [cameraCallback, setCameraCallback] = useState(null);
 
-    // Nueva función para cámara en móvil
-    const handleCameraCapture = async (setCallback, esMoneda) => {
+    // Función para abrir cámara con overlay personalizado
+    const handleCameraCapture = (setCallback, esMonedaTipo) => {
+        setCameraCallback(() => setCallback);
+        setShowCameraOverlay(true);
+    };
+
+    // Callback cuando se captura imagen del overlay - pasa directo sin editor
+    const handleCameraOverlayCapture = async (imagenBase64) => {
         try {
-            const image = await CapCamera.getPhoto({
-                quality: 90,
-                allowEditing: false,
-                resultType: CameraResultType.DataUrl,
-                source: CameraSource.Camera
-            });
-
-            if (image.dataUrl) {
-                const compressed = await compressImage(image.dataUrl);
-                setImagenEditando(compressed);
-                setTipoImagenEditando({ callback: setCallback, esMoneda });
+            const compressed = await compressImage(imagenBase64);
+            // Pasar directamente al callback sin abrir el editor
+            if (cameraCallback) {
+                cameraCallback(compressed);
             }
         } catch (error) {
-            console.error('Error al capturar imagen:', error);
+            console.error('Error al procesar imagen:', error);
+        } finally {
+            setShowCameraOverlay(false);
+            setCameraCallback(null);
         }
+    };
+
+    // Cancelar overlay de cámara
+    const handleCameraOverlayCancel = () => {
+        setShowCameraOverlay(false);
+        setCameraCallback(null);
     };
 
     // Nueva función para galería en móvil
@@ -467,6 +478,15 @@ const Formulario = ({ tipoFormulario, itemEditando, setVista, setItemEditando })
                         setImagenEditando(null);
                         setTipoImagenEditando(null);
                     }}
+                />
+            )}
+
+            {/* Cámara con overlay personalizado */}
+            {showCameraOverlay && (
+                <CameraOverlay
+                    esMoneda={esMoneda}
+                    onCapture={handleCameraOverlayCapture}
+                    onCancel={handleCameraOverlayCancel}
                 />
             )}
         </div>

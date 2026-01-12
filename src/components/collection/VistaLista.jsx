@@ -376,7 +376,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
 
                     {mostrarFiltros && (
                         <div className={`mb-6 p-4 rounded-xl border-2 ${modoOscuro ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
                                 <div>
                                     <label className={`block text-sm font-semibold mb-2 ${modoOscuro ? 'text-gray-300' : 'text-gray-700'}`}>
                                         País
@@ -507,7 +507,7 @@ const VistaLista = ({ tipo, setVista, setTipoFormulario, setItemEditando, inicia
                         )}
 
                         {vistaDisplay === 'cuadricula' ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                                 {itemsFiltrados.map((item) => (
                                     <CardItem
                                         key={item.id}
