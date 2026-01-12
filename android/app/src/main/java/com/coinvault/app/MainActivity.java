@@ -6,7 +6,9 @@ import android.webkit.WebView;
 
 import com.getcapacitor.BridgeActivity;
 
-public class MainActivity extends BridgeActivity {
+import ee.forgr.capacitor.social.login.ModifiedMainActivityForSocialLoginPlugin;
+
+public class MainActivity extends BridgeActivity implements ModifiedMainActivityForSocialLoginPlugin {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,5 +20,10 @@ public class MainActivity extends BridgeActivity {
 
         // Registrar GoogleAuth plugin para permitir scopes personalizados
         this.registerPlugin(ee.forgr.capacitor.social.login.SocialLoginPlugin.class);
+    }
+
+    @Override
+    public void IHaveModifiedTheMainActivityForTheUseWithSocialLoginPlugin() {
+        // This method is required by the plugin to verify MainActivity modification
     }
 }
