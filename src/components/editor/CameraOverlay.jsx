@@ -174,20 +174,32 @@ const CameraOverlay = ({ esMoneda, onCapture, onCancel }) => {
                 canvas.height = cropHeight;
 
                 if (esMoneda) {
-                    // Recorte circular
+                    // Para monedas: usar máscara circular para transparencia real
+                    // Primero, dibujar la imagen
+                    ctx.drawImage(
+                        img,
+                        cropX, cropY, cropWidth, cropHeight,
+                        0, 0, cropWidth, cropHeight
+                    );
+
+                    // Crear máscara circular usando composición
+                    ctx.globalCompositeOperation = 'destination-in';
                     ctx.beginPath();
                     ctx.arc(cropWidth / 2, cropHeight / 2, Math.min(cropWidth, cropHeight) / 2, 0, Math.PI * 2);
                     ctx.closePath();
-                    ctx.clip();
+                    ctx.fillStyle = '#000'; // El color no importa, solo la forma
+                    ctx.fill();
+                } else {
+                    // Para billetes: recorte rectangular normal
+                    ctx.drawImage(
+                        img,
+                        cropX, cropY, cropWidth, cropHeight,
+                        0, 0, cropWidth, cropHeight
+                    );
                 }
 
-                ctx.drawImage(
-                    img,
-                    cropX, cropY, cropWidth, cropHeight,
-                    0, 0, cropWidth, cropHeight
-                );
-
-                resolve(canvas.toDataURL('image/png', 0.9));
+                // Usar PNG para mantener transparencia
+                resolve(canvas.toDataURL('image/png'));
             };
             img.src = imagenBase64;
         });

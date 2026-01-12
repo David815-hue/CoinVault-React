@@ -15,5 +15,8 @@ public class MainActivity extends BridgeActivity {
         WebView webView = getBridge().getWebView();
         webView.setBackgroundColor(Color.TRANSPARENT);
         webView.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+
+        // Registrar GoogleAuth plugin para permitir scopes personalizados
+        this.registerPlugin(ee.forgr.capacitor.social.login.SocialLoginPlugin.class);
     }
 }

@@ -25,7 +25,13 @@ export const compressImage = (base64String, maxWidth = 1024, quality = 0.7) => {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            resolve(canvas.toDataURL('image/jpeg', quality));
+            // Detect if original was PNG to preserve transparency
+            const isPng = base64String.startsWith('data:image/png');
+            const outputType = isPng ? 'image/png' : 'image/jpeg';
+
+            // For PNGs, quality argument might not work effectively in toDataURL in some browsers/versions
+            // but we pass it anyway. For JPEGs it controls compression.
+            resolve(canvas.toDataURL(outputType, quality));
         };
         img.onerror = (error) => reject(error);
     });
