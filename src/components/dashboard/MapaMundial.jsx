@@ -255,8 +255,8 @@ const MapaMundial = ({ datos, tipo, titulo, setPaisSeleccionado }) => {
             <button
                 onClick={() => setViewMode('map')}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'map'
-                        ? (tipo === 'monedas' ? 'bg-amber-500 text-white' : 'bg-green-500 text-white')
-                        : (modoOscuro ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+                    ? (tipo === 'monedas' ? 'bg-amber-500 text-white' : 'bg-green-500 text-white')
+                    : (modoOscuro ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
                     }`}
             >
                 <Map size={16} />
@@ -265,8 +265,8 @@ const MapaMundial = ({ datos, tipo, titulo, setPaisSeleccionado }) => {
             <button
                 onClick={() => setViewMode('chart')}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'chart'
-                        ? (tipo === 'monedas' ? 'bg-amber-500 text-white' : 'bg-green-500 text-white')
-                        : (modoOscuro ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
+                    ? (tipo === 'monedas' ? 'bg-amber-500 text-white' : 'bg-green-500 text-white')
+                    : (modoOscuro ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900')
                     }`}
             >
                 <PieChart size={16} />

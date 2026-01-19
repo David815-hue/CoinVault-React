@@ -6,22 +6,61 @@ const SCOPES = "https://www.googleapis.com/auth/drive.file";
 
 export const initGoogleDrive = (accessToken) => {
     return new Promise((resolve, reject) => {
-        gapi.load('client', () => {
-            gapi.client.init({
-                discoveryDocs: DISCOVERY_DOCS,
-            }).then(() => {
-                // Set the access token for the gapi client
-                if (accessToken) {
-                    gapi.client.setToken({ access_token: accessToken });
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
-            }).catch(error => {
-                console.error("Error initializing GAPI client", error);
-                reject(error);
+        // Timeout para evitar que se quede cargando infinitamente
+        const timeoutId = setTimeout(() => {
+            reject(new Error("Timeout initializing Google Drive API"));
+        }, 10000); // 10 segundos timeout
+
+        const loadGapi = () => {
+            if (typeof gapi === 'undefined') {
+                console.error("GAPI script not loaded");
+                // Intentar cargar el script si no existe
+                const script = document.createElement('script');
+                script.src = "https://apis.google.com/js/api.js";
+                script.onload = () => loadGapi();
+                script.onerror = () => {
+                    clearTimeout(timeoutId);
+                    reject(new Error("Failed to load GAPI script"));
+                };
+                document.body.appendChild(script);
+                return;
+            }
+
+            gapi.load('client', () => {
+                gapi.client.init({
+                    discoveryDocs: DISCOVERY_DOCS,
+                }).then(() => {
+                    clearTimeout(timeoutId);
+                    if (accessToken) {
+                        gapi.client.setToken({ access_token: accessToken });
+                        console.log("GAPI Client initialized and token set");
+                        resolve(true);
+                    } else {
+                        console.log("GAPI Client initialized without token");
+                        resolve(false);
+                    }
+                }).catch(error => {
+                    clearTimeout(timeoutId);
+                    console.error("Error initializing GAPI client", error);
+                    reject(error);
+                });
             });
-        });
+        };
+
+        // Si ya está cargado y listo, intentar usarlo
+        if (typeof gapi !== 'undefined' && gapi.client) {
+            // Verificar si ya está inicializado o intentar reusar
+            try {
+                if (accessToken) gapi.client.setToken({ access_token: accessToken });
+                clearTimeout(timeoutId);
+                resolve(true);
+            } catch (e) {
+                // Si falla, intentar cargar de nuevo
+                loadGapi();
+            }
+        } else {
+            loadGapi();
+        }
     });
 };
 

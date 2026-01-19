@@ -17,6 +17,7 @@ import LoginScreen from './components/auth/LoginScreen';
 import AdminPanel from './components/admin/AdminPanel';
 import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
+import BackupReminderModal from './components/drive/BackupReminderModal';
 
 const MainContent = () => {
   const { modoOscuro } = useTheme();
@@ -29,6 +30,7 @@ const MainContent = () => {
   const [imagenZoom, setImagenZoom] = useState(null);
   const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
   const [mostrarTemas, setMostrarTemas] = useState(false);
+  const [mostrarBackupReminder, setMostrarBackupReminder] = useState(false);
   const [modoSlideshow, setModoSlideshow] = useState(false);
   const [tipoSlideshow, setTipoSlideshow] = useState('monedas');
 
@@ -41,6 +43,36 @@ const MainContent = () => {
     if (Capacitor.isNativePlatform()) {
       StatusBar.hide().catch(console.error);
     }
+
+    // Check backup reminder
+    const checkBackupReminder = () => {
+      const freq = localStorage.getItem('backup_reminder_frequency') || '1_week';
+      if (freq === 'never') return;
+
+      const lastShown = localStorage.getItem('last_backup_reminder_shown');
+      if (!lastShown) {
+        // Si no hay registro previo, lo creamos con fecha de hoy para empezar el ciclo
+        // Asi no "spameamos" al primer inicio, sino que recordamos en 1 semana
+        localStorage.setItem('last_backup_reminder_shown', Date.now().toString());
+        return;
+      }
+
+      const now = Date.now();
+      const last = parseInt(lastShown, 10);
+      const timeDiff = now - last;
+
+      let freqMs = 7 * 24 * 60 * 60 * 1000;
+      if (freq === '2_weeks') freqMs = 14 * 24 * 60 * 60 * 1000;
+      if (freq === '1_month') freqMs = 30 * 24 * 60 * 60 * 1000;
+
+      if (timeDiff > freqMs) {
+        setMostrarBackupReminder(true);
+      }
+    };
+
+    // Pequeño delay para no interferir con cargas iniciales
+    const timer = setTimeout(checkBackupReminder, 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   if (cargando) {
@@ -141,6 +173,12 @@ const MainContent = () => {
         <Slideshow
           tipo={tipoSlideshow}
           onClose={() => setModoSlideshow(false)}
+        />
+      )}
+
+      {mostrarBackupReminder && (
+        <BackupReminderModal
+          onClose={() => setMostrarBackupReminder(false)}
         />
       )}
     </div>
